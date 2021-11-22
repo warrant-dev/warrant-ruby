@@ -3,6 +3,10 @@
 require "warrant/version"
 
 
+require "warrant/models/user"
+require "warrant/models/userset"
+require "warrant/models/user_warrant"
+require "warrant/models/userset_warrant"
 require "warrant/warrant_configuration"
 
 module Warrant
