@@ -3,18 +3,91 @@
 module Warrant
     class WarrantClient
         class << self
-            def create_user(user_id = '', username = '')
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users")
+            def create_tenant(tenant_id = '')
+                uri = URI.parse("#{Warrant.config.api_base}/v1/tenants")
                 params = {
-                    userId: user_id,
-                    username: username
+                    tenantId: tenant_id
                 }
                 res = post(uri, params)
                 res_json = JSON.parse(res.body)
-                
+
                 case res
                 when Net::HTTPSuccess
-                    User.new(res_json['userId'])
+                    Tenant.new(res_json['tenantId'])
+                else
+                    res_json
+                end
+            end
+
+            def create_user(email, user_id = '', tenant_id = '')
+                uri = URI.parse("#{Warrant.config.api_base}/v1/users")
+                params = {
+                    tenantId: tenant_id,
+                    userId: user_id,
+                    email: email
+                }
+                res = post(uri, params)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    User.new(res_json['tenantId'], res_json['userId'], res_json['email'])
+                else
+                    res_json
+                end
+            end
+
+            def create_role(role_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/roles")
+                params = {
+                    roleId: role_id
+                }
+                res = post(uri, params)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    Role.new(res_json['roleId'])
+                else
+                    res_json
+                end
+            end
+
+            def delete_role(role_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/roles/#{role_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
+                else
+                    res_json
+                end
+            end
+
+            def create_permission(permission_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/permissions")
+                params = {
+                    permissionId: permission_id
+                }
+                res = post(uri, params)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    Permission.new(res_json['permissionId'])
+                else
+                    res_json
+                end
+            end
+
+            def delete_permission(permission_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/permissions/#{permission_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
                 else
                     res_json
                 end
@@ -30,7 +103,7 @@ module Warrant
                 }
                 res = post(uri, params)
                 res_json = JSON.parse(res.body)
-                
+
                 case res
                 when Net::HTTPSuccess
                     if res_json['user']['userId']
@@ -38,6 +111,56 @@ module Warrant
                     elsif res_json['user']['objectType']
                         UsersetWarrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user'])
                     end
+                else
+                    res_json
+                end
+            end
+
+            def assign_role_to_user(user_id, role_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
+                res = post(uri)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    Role.new(res_json['roleId'])
+                else
+                    res_json
+                end
+            end
+
+            def remove_role_from_user(user_id, role_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
+                else
+                    res_json
+                end
+            end
+
+            def assign_permission_to_user(user_id, permission_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
+                res = post(uri)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    Permission.new(res_json['permissionId'])
+                else
+                    res_json
+                end
+            end
+
+            def remove_permission_from_user(user_id, permission_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
                 else
                     res_json
                 end
@@ -51,6 +174,24 @@ module Warrant
                 case res
                 when Net::HTTPSuccess
                     res_json['token']
+                else
+                    res_json
+                end
+            end
+
+            def create_self_service_session(user_id, redirect_url)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/sessions")
+                params = {
+                    type: "ssdash",
+                    userId: user_id,
+                    redirectUrl: redirect_url
+                }
+                res = post(uri, params)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    res_json['url']
                 else
                     res_json
                 end
@@ -76,15 +217,28 @@ module Warrant
                 end
             end
 
+            def has_permission(permission_id, user_id)
+                return is_authorized("permission", permission_id, "member", user_id)
+            end
+
             private
 
-            def post(uri, params = {}) 
+            def post(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = true
                 headers = {
                     "Authorization": "ApiKey #{Warrant.config.api_key}"
                 }
                 http.post(uri.path, params.to_json, headers)
+            end
+
+            def delete(uri)
+                http = Net::HTTP.new(uri.host, uri.port)
+                http.use_ssl = true
+                headers = {
+                    "Authorization": "ApiKey #{Warrant.config.api_key}"
+                }
+                http.delete(uri.path, headers)
             end
         end
     end
