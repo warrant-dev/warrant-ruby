@@ -107,9 +107,9 @@ module Warrant
                 case res
                 when Net::HTTPSuccess
                     if res_json['user']['userId']
-                        UserWarrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user']['userId'])
+                        UserWarrant.new(res_json['id'], res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user']['userId'])
                     elsif res_json['user']['objectType']
-                        UsersetWarrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user'])
+                        UsersetWarrant.new(res_json['id'], res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user'])
                     end
                 else
                     res_json

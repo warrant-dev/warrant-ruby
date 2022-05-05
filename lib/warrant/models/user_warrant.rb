@@ -2,9 +2,10 @@
 
 module Warrant
     class UserWarrant
-        attr_reader :object_type, :object_id, :relation, :user
+        attr_reader :id, :object_type, :object_id, :relation, :user
 
-        def initialize(object_type, object_id, relation, user_id)
+        def initialize(id, object_type, object_id, relation, user_id)
+            @id = id
             @object_type = object_type
             @object_id = object_id
             @relation = relation
