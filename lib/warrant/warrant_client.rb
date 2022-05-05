@@ -116,6 +116,18 @@ module Warrant
                 end
             end
 
+            def delete_warrant(warrant_id)
+                uri = URI.parse("#{Warrant.config.api_base}/v1/warrants/#{warrant_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
+                else
+                    res_json
+                end
+            end
+
             def assign_role_to_user(user_id, role_id)
                 uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
                 res = post(uri)
