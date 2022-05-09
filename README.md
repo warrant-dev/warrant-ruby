@@ -28,13 +28,13 @@ require 'warrant'
 Warrant.api_key = 'api_test_f5dsKVeYnVSLHGje44zAygqgqXiLJBICbFzCiAg1E='
 ```
 
-### `create_user(user_id, username)`
+### `create_user(email, user_id = '', tenant_id = '')`
 
 This method creates a user entity in Warrant with the specified `userId`. Provide an optional `username` to make it easier to identify users in the Warrant dashboard.
 
 ```ruby
-# Create user with `user.id` as the user_id and `user.email` as the username
-Warrant::WarrantClient.create_user(user.id, user.email)
+# Create user with user email and id
+Warrant::WarrantClient.create_user(user.email, user.id)
 
 # Create user with generated id
 Warrant::WarrantClient.create_user()
@@ -68,9 +68,23 @@ Warrant::WarrantClient.is_authorized('store', '824', 'view', '123') # true
 Warrant::WarrantClient.is_authorized('store', '824', 'edit', '123') # false
 ```
 
-### `list_warrants(object_type: nil, object_id: nil, relation: nil, user_id: nil)`
-
+### `list_warrants(filters = {})`
 This method returns all warrants that match the filters provided, or all warrants for your organization if none are provided. 
+
+#### **Filter Parameters** 
+---
+#### **objectType**
+Only return warrants with the given object type.
+
+#### **objectId**
+Only return warrants with the given object id.
+
+#### **relation**
+Only return warrants with the given relation.
+
+#### **userId**
+Only return warrants with the given user id
+
 
 ```ruby
 # List all warrants for an organization
@@ -79,6 +93,8 @@ Warrant::WarrantClient.list_warrants
 # List all warrants with object type of store
 Warrant::WarrantClient.list_warrants(object_type: 'store')
 ```
+
+---
 
 We’ve used a random API key in these code examples. Replace it with your [actual publishable API keys](https://app.warrant.dev) to
 test this code through your own Warrant account.

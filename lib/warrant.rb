@@ -12,6 +12,7 @@ require "warrant/models/tenant"
 require "warrant/models/user"
 require "warrant/models/userset"
 require "warrant/models/warrant"
+require "warrant/util"
 require "warrant/warrant_configuration"
 require "warrant/warrant_client"
 
