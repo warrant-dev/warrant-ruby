@@ -124,6 +124,28 @@ module Warrant
                 end
             end
 
+            def list_warrants(object_type: nil, object_id: nil, relation: nil, user_id: nil)
+                params = {
+                    objectType: object_type,
+                    objectId: object_id,
+                    relation: relation,
+                    userId: user_id
+                }.compact!
+                
+                query_string = URI.encode_www_form(params)
+
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/warrants?#{query_string}")
+
+                res = get(uri, params)
+                res_json = JSON.parse(res.body)
+
+                warrants = res_json.map do |warrant|
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], warrant['user'])
+                end
+
+                warrants
+            end
+
             def assign_role_to_user(user_id, role_id)
                 uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
                 res = post(uri)
@@ -247,6 +269,15 @@ module Warrant
                     "Authorization": "ApiKey #{::Warrant.config.api_key}"
                 }
                 http.delete(uri.path, headers)
+            end
+
+            def get(uri, params = {})
+                http = Net::HTTP.new(uri.host, uri.port)
+                http.use_ssl = true
+                headers = {
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
+                }
+                http.get(uri, headers)
             end
         end
     end
