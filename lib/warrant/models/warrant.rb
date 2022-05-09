@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Warrant
-    class UsersetWarrant
+    class Warrant
         attr_reader :id, :object_type, :object_id, :relation, :user
 
         def initialize(id, object_type, object_id, relation, user)

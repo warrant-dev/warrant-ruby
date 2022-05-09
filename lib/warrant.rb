@@ -11,13 +11,13 @@ require "warrant/models/role"
 require "warrant/models/tenant"
 require "warrant/models/user"
 require "warrant/models/userset"
-require "warrant/models/user_warrant"
-require "warrant/models/userset_warrant"
+require "warrant/models/warrant"
+require "warrant/util"
 require "warrant/warrant_configuration"
 require "warrant/warrant_client"
 
 module Warrant
-    @config = Warrant::WarrantConfiguration.new
+    @config = ::Warrant::WarrantConfiguration.new
 
     class << self
         extend Forwardable

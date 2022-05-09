@@ -4,7 +4,7 @@ module Warrant
     class WarrantClient
         class << self
             def create_tenant(tenant_id = '')
-                uri = URI.parse("#{Warrant.config.api_base}/v1/tenants")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/tenants")
                 params = {
                     tenantId: tenant_id
                 }
@@ -20,7 +20,7 @@ module Warrant
             end
 
             def create_user(email, user_id = '', tenant_id = '')
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users")
                 params = {
                     tenantId: tenant_id,
                     userId: user_id,
@@ -38,7 +38,7 @@ module Warrant
             end
 
             def create_role(role_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/roles")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/roles")
                 params = {
                     roleId: role_id
                 }
@@ -54,7 +54,7 @@ module Warrant
             end
 
             def delete_role(role_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/roles/#{role_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}")
                 res = delete(uri)
 
                 case res
@@ -66,7 +66,7 @@ module Warrant
             end
 
             def create_permission(permission_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/permissions")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/permissions")
                 params = {
                     permissionId: permission_id
                 }
@@ -82,7 +82,7 @@ module Warrant
             end
 
             def delete_permission(permission_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/permissions/#{permission_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/permissions/#{permission_id}")
                 res = delete(uri)
 
                 case res
@@ -94,7 +94,7 @@ module Warrant
             end
 
             def create_warrant(object_type, object_id, relation, user)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/warrants")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/warrants")
                 params = {
                     objectType: object_type,
                     objectId: object_id,
@@ -106,11 +106,7 @@ module Warrant
 
                 case res
                 when Net::HTTPSuccess
-                    if res_json['user']['userId']
-                        UserWarrant.new(res_json['id'], res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user']['userId'])
-                    elsif res_json['user']['objectType']
-                        UsersetWarrant.new(res_json['id'], res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user'])
-                    end
+                    Warrant.new(res_json['id'], res_json['objectType'], res_json['objectId'], res_json['relation'], res_json['user'])
                 else
                     res_json
                 end
@@ -128,8 +124,31 @@ module Warrant
                 end
             end
 
+            def list_warrants(filters = {})
+                query_string = ""
+                unless filters.empty?
+                    new_filters = Util.normalize_options(filters.compact)
+
+                    query_string = URI.encode_www_form(new_filters) 
+                end
+
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/warrants?#{query_string}")
+
+                res = get(uri)
+                res_json = JSON.parse(res.body)
+
+                case res
+                when Net::HTTPSuccess
+                    res_json.map do |warrant|
+                        Warrant.new(warrant['id'], warrant['objectType'], warrant['objectId'], warrant['relation'], warrant['user'])
+                    end
+                else
+                    res_json
+                end
+            end
+
             def assign_role_to_user(user_id, role_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
                 res = post(uri)
                 res_json = JSON.parse(res.body)
 
@@ -142,7 +161,7 @@ module Warrant
             end
 
             def remove_role_from_user(user_id, role_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}")
                 res = delete(uri)
 
                 case res
@@ -154,7 +173,7 @@ module Warrant
             end
 
             def assign_permission_to_user(user_id, permission_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
                 res = post(uri)
                 res_json = JSON.parse(res.body)
 
@@ -167,7 +186,7 @@ module Warrant
             end
 
             def remove_permission_from_user(user_id, permission_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}")
                 res = delete(uri)
 
                 case res
@@ -179,7 +198,7 @@ module Warrant
             end
 
             def create_session(user_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/users/#{user_id}/sessions")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/sessions")
                 res = post(uri)
                 res_json = JSON.parse(res.body)
 
@@ -192,7 +211,7 @@ module Warrant
             end
 
             def create_self_service_session(user_id, redirect_url)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/sessions")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/sessions")
                 params = {
                     type: "ssdash",
                     userId: user_id,
@@ -210,7 +229,7 @@ module Warrant
             end
 
             def is_authorized(object_type, object_id, relation, user_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/authorize")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/authorize")
                 params = {
                     objectType: object_type,
                     objectId: object_id,
@@ -239,7 +258,7 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = true
                 headers = {
-                    "Authorization": "ApiKey #{Warrant.config.api_key}"
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
                 }
                 http.post(uri.path, params.to_json, headers)
             end
@@ -248,9 +267,18 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = true
                 headers = {
-                    "Authorization": "ApiKey #{Warrant.config.api_key}"
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
                 }
                 http.delete(uri.path, headers)
+            end
+
+            def get(uri, params = {})
+                http = Net::HTTP.new(uri.host, uri.port)
+                http.use_ssl = true
+                headers = {
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
+                }
+                http.get(uri, headers)
             end
         end
     end
