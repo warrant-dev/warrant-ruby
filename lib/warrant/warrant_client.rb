@@ -19,10 +19,9 @@ module Warrant
                 end
             end
 
-            def create_user(email, user_id = '', tenant_id = '')
+            def create_user(email, user_id = '')
                 uri = URI.parse("#{::Warrant.config.api_base}/v1/users")
                 params = {
-                    tenantId: tenant_id,
                     userId: user_id,
                     email: email
                 }
@@ -99,7 +98,7 @@ module Warrant
                     objectType: object_type,
                     objectId: object_id,
                     relation: relation,
-                    user: user
+                    user: Util.normalize_options(user)
                 }
                 res = post(uri, params)
                 res_json = JSON.parse(res.body)
@@ -113,7 +112,7 @@ module Warrant
             end
 
             def delete_warrant(warrant_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/warrants/#{warrant_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/warrants/#{warrant_id}")
                 res = delete(uri)
 
                 case res
