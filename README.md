@@ -42,6 +42,18 @@ Warrant::WarrantClient.create_user()
 
 ### `create_warrant(objectType, objectId, relation, user)`
 
+#### **User parameters**
+Can provide either a user id, or a combination of object type, object id, and relation
+---
+#### **user_id**
+Creates a warrant for the user specified by user_id
+
+#### **object_type**
+#### **object_id**
+#### **relation**
+Creates a warrant for the given userset specified by object type, object id, and relation
+
+
 This method creates a warrant which specifies that the provided `user` (or userset) has `relation` on the object of type `objectType` with id `objectId`.
 
 ```ruby

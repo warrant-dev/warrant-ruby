@@ -98,7 +98,7 @@ module Warrant
                     objectType: object_type,
                     objectId: object_id,
                     relation: relation,
-                    user: user
+                    user: Util.normalize_options(user)
                 }
                 res = post(uri, params)
                 res_json = JSON.parse(res.body)
