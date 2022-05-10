@@ -113,7 +113,7 @@ module Warrant
             end
 
             def delete_warrant(warrant_id)
-                uri = URI.parse("#{Warrant.config.api_base}/v1/warrants/#{warrant_id}")
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/warrants/#{warrant_id}")
                 res = delete(uri)
 
                 case res
