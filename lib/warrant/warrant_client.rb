@@ -19,10 +19,9 @@ module Warrant
                 end
             end
 
-            def create_user(email, user_id = '', tenant_id = '')
+            def create_user(email, user_id = '')
                 uri = URI.parse("#{::Warrant.config.api_base}/v1/users")
                 params = {
-                    tenantId: tenant_id,
                     userId: user_id,
                     email: email
                 }

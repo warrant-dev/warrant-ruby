@@ -28,7 +28,7 @@ require 'warrant'
 Warrant.api_key = 'api_test_f5dsKVeYnVSLHGje44zAygqgqXiLJBICbFzCiAg1E='
 ```
 
-### `create_user(email, user_id = '', tenant_id = '')`
+### `create_user(email, user_id = '')`
 
 This method creates a user entity in Warrant with the specified `userId`. Provide an optional `username` to make it easier to identify users in the Warrant dashboard.
 
