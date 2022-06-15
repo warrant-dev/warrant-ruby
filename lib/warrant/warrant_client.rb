@@ -31,7 +31,7 @@ module Warrant
                 end 
             end
 
-            def create_user(email, user_id = '')
+            def create_user(email = '', user_id = '')
                 uri = URI.parse("#{::Warrant.config.api_base}/v1/users")
                 params = {
                     userId: user_id,
