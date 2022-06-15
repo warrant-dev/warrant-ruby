@@ -19,6 +19,18 @@ module Warrant
                 end
             end
 
+            def delete_tenant(tenant_id)
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
+                else
+                    JSON.parse(res.body)
+                end 
+            end
+
             def create_user(email, user_id = '')
                 uri = URI.parse("#{::Warrant.config.api_base}/v1/users")
                 params = {
@@ -33,6 +45,18 @@ module Warrant
                     User.new(res_json['tenantId'], res_json['userId'], res_json['email'])
                 else
                     res_json
+                end
+            end
+
+            def delete_user(user_id)
+                uri = URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}")
+                res = delete(uri)
+
+                case res
+                when Net::HTTPSuccess
+                    return
+                else
+                    JSON.parse(res.body)
                 end
             end
 
