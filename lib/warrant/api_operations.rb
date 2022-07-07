@@ -45,6 +45,31 @@ module Warrant
                 }
                 http.put(uri.path, params.to_json, headers)
             end
+
+            def raise_error(response)
+                error_code = JSON.parse(response.body)['code']
+
+                case error_code
+                when Error::DUPLICATE_RECORD_ERROR
+                    raise DuplicateRecordError.initialize_error_from_response(response)
+                when Error::INTERNAL_ERROR
+                    raise InternalError.initialize_error_from_response(response)
+                when Error::INVALID_REQUEST_ERROR
+                    raise InvalidRequestError.initialize_error_from_response(response)
+                when Error::INVALID_PARAMETER_ERROR
+                    raise InvalidParameterError.initialize_error_from_response(response)
+                when Error::MISSING_REQUIRED_PARAMETER_ERROR
+                    raise MissingRequiredParameterError.initialize_error_from_response(response)
+                when Error::NOT_FOUND_ERROR
+                    raise NotFoundError.initialize_error_from_response(response)
+                when Error::UNAUTHORIZED_ERROR
+                    raise UnauthorizedError.initialize_error_from_response(response)
+                when Error::UNKNOWN_ORIGIN_ERROR
+                    raise UnknownOriginError.initialize_error_from_response(response)
+                else
+                    raise WarrantError.initialize_error_from_response(response)
+                end
+            end
         end
     end
 end
