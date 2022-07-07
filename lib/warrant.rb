@@ -6,6 +6,7 @@ require "net/http"
 require "json"
 require "forwardable"
 
+require "warrant/api_operations"
 require "warrant/models/permission"
 require "warrant/models/role"
 require "warrant/models/tenant"
