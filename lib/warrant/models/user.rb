@@ -32,13 +32,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(params = {})
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 User.new(res_json['userId'], res_json['email'], res_json['createdAt'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -64,7 +64,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 
@@ -89,7 +89,7 @@ module Warrant
                 users = JSON.parse(res.body)
                 users.map{ |user| User.new(user['userId'], user['email'], user['createdAt']) }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end   
         end
 
@@ -114,7 +114,7 @@ module Warrant
                 user = JSON.parse(res.body)
                 User.new(user['userId'], user['email'], user['createdAt'])
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end  
         end
 
@@ -139,13 +139,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.update(user_id, params = {})
             res = APIOperations.put(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 User.new(res_json['userId'], res_json['email'], res_json['createdAt'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -188,7 +188,7 @@ module Warrant
                 roles = JSON.parse(res.body)
                 roles.map{ |role| Role.new(role['roleId']) }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end 
         end
 
@@ -210,13 +210,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def assign_role(role_id)
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}"))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Role.new(res_json['roleId'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -237,7 +237,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 
@@ -258,7 +258,7 @@ module Warrant
                 permissions = JSON.parse(res.body)
                 permissions.map{ |permission| Permission.new(permission['permissionId']) }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end 
         end
 
@@ -280,13 +280,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def assign_permission(permission_id)
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Permission.new(res_json['permissionId'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -307,7 +307,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 

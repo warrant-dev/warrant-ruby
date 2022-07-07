@@ -29,13 +29,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(params = {})
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/permissions"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Permission.new(res_json['permissionId'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -61,7 +61,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 
@@ -86,7 +86,7 @@ module Warrant
                 permissions = JSON.parse(res.body)
                 permissions.map{ |permission| Permission.new(permission['permissionId']) }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end   
         end
 
@@ -111,7 +111,7 @@ module Warrant
                 permission = JSON.parse(res.body)
                 Permission.new(permission['permissionId'])
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end  
         end
     end

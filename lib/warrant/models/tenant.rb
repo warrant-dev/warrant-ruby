@@ -32,13 +32,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(params = {})
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Tenant.new(res_json['tenantId'], res_json['name'], res_json['createdAt'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -64,7 +64,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 
@@ -89,7 +89,7 @@ module Warrant
                 tenants = JSON.parse(res.body)
                 tenants.map{ |tenant| Tenant.new(tenant['tenantId'], tenant['name'], tenant['createdAt']) }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end   
         end
 
@@ -114,7 +114,7 @@ module Warrant
                 tenant = JSON.parse(res.body)
                 Tenant.new(tenant['tenantId'], tenant['name'], tenant['createdAt'])
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end  
         end
 
@@ -139,13 +139,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.update(tenant_id, params = {})
             res = APIOperations.put(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Tenant.new(res_json['tenantId'], res_json['name'], res_json['createdAt'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 

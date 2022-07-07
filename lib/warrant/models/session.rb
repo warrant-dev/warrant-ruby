@@ -25,13 +25,13 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(params = {})
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
                 Session.new(res_json['userId'], res_json['token'])
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
     end

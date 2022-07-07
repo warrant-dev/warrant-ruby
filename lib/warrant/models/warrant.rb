@@ -73,7 +73,7 @@ module Warrant
             when Net::HTTPSuccess
                 return
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end
         end
 
@@ -102,7 +102,7 @@ module Warrant
                     Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
                 }
             else
-                JSON.parse(res.body)
+                APIOperations.raise_error(res)
             end   
         end
 
@@ -169,7 +169,7 @@ module Warrant
                 subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'])
                 Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
@@ -210,7 +210,7 @@ module Warrant
                     return res_json
                 end
             else
-                res_json
+                APIOperations.raise_error(res)
             end
         end
 
