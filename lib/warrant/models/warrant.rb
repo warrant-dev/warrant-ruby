@@ -174,20 +174,32 @@ module Warrant
         end
 
         # Checks whether a specified access check is authorized or not.
+        # If you would like to check only one warrant, then you can exclude the op param and provide an array with one warrant.
         #
-        # @param object_type [String] The type of object. Must be one of your system's existing object types.
-        # @param object_id [String] The id of the specific object.	
-        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [Hash] The specific subject for which access will be checked. Can be a specific object by id or an objectType, objectId and relation set.
-        #   * object_type [String] The type of object. Must be one of your system's existing object types.   
-        #   * object_id [String] The id of the specific object.	   
-        #   * relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param op [String] Logical operator to perform on warrants. Can be 'anyOf' or 'allOf'. (optional) 
+        # @param warrants [Array] Array of warrants to check access for. 
+        #   * object_type (String) - The type of object. Must be one of your system's existing object types.
+        #   * object_id (String) - The id of the specific object.	
+        #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        #   * subject (Hash) - The specific subject for which access will be checked. Can be a specific object by id or an objectType, objectId and relation set.
+        #       * object_type (String) - The type of object. Must be one of your system's existing object types.   
+        #       * object_id (String) - The id of the specific object.	   
+        #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
         # @return [Hash] if request failed
         #
         # @example Check whether user "5djfs6" can view the report with id "avk2837"
-        #   Warrant::Warrant.is_authorized?(object_type: "report", object_id: "avk2837", relation: "viewer", subject: { object_type: "user", object_id: "5djfs6" })
+        #   Warrant::Warrant.is_authorized?(warrants: [{ object_type: "report", object_id: "avk2837", relation: "viewer", subject: { object_type: "user", object_id: "5djfs6" } }])
+        #
+        # @example Check whether user "5djfs6" can view both report id "report-1" and report id "report-2"
+        #   Warrant::Warrant.is_authorized?(
+        #       op: "allOf",
+        #       warrants: [
+        #           { object_type: "report", object_id: "report-1", relation: "viewer", subject: { object_type: "user", object_id: "5djfs6" } }
+        #           { object_type: "report", object_id: "report-2", relation: "viewer", subject: { object_type: "user", object_id: "5djfs6" } }
+        #       ]
+        #   )
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
