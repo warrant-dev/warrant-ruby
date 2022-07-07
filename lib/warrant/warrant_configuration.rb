@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Warrant
+    # @!visibility private
     class WarrantConfiguration
         attr_accessor :api_key
 

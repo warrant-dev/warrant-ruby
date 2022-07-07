@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 module Warrant
+    # @!visibility private
     class Util
         class << self
             def camelcase(str)
                 str = str.split('_').collect(&:capitalize).join
                 str.sub(str[0], str[0].downcase)
+            end
+
+            def snake_case(str)
+                str.gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+                    .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+                    .downcase
             end
 
             def normalize_options(opts)
