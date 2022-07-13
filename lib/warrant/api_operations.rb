@@ -4,9 +4,9 @@ module Warrant
     # @!visibility private
     class APIOperations
         class << self
-            def post(uri, params = {})
+            def post(uri, params = {}, use_ssl = true)
                 http = Net::HTTP.new(uri.host, uri.port)
-                http.use_ssl = true
+                http.use_ssl = use_ssl
                 headers = {
                     "Authorization": "ApiKey #{::Warrant.config.api_key}"
                 }
@@ -20,7 +20,7 @@ module Warrant
                 request["Authorization"] = "ApiKey #{::Warrant.config.api_key}"
 
                 http.request(request, params.to_json)
-            end     
+            end
 
             def get(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
@@ -33,7 +33,7 @@ module Warrant
                     normalized_params = Util.normalize_params(params.compact)
                     uri.query = URI.encode_www_form(normalized_params)
                 end
-                
+
                 http.get(uri, headers)
             end
 
