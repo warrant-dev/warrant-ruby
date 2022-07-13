@@ -110,5 +110,37 @@ module Warrant
                 APIOperations.raise_error(res)
             end  
         end
+
+        # Assign a permission to a role
+        #
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
+        #
+        # @return [Permission] assigned permission
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def assign_permission(permission_id)
+            return Permission.assign_to_role(permission_id, role_id)
+        end
+
+        # Remove a permission from a role
+        #
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
+        #
+        # @return [nil] if remove was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def remove_permission(permission_id)
+            return Permission.remove_from_role(permission_id, role_id)
+        end
     end
 end
