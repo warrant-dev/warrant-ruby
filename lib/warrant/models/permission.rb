@@ -124,7 +124,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.assign_to_role(permission_id, role_id)
+        def self.assign_to_role(role_id, permission_id)
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions/#{permission_id}"))
 
             case res
@@ -149,7 +149,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.remove_from_role(permission_id, role_id)
+        def self.remove_from_role(role_id, permission_id)
             res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions/#{permission_id}"))
 
             case res

@@ -124,7 +124,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def assign_permission(permission_id)
-            return Permission.assign_to_role(permission_id, role_id)
+            return Permission.assign_to_role(role_id, permission_id)
         end
 
         # Remove a permission from a role
@@ -140,7 +140,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def remove_permission(permission_id)
-            return Permission.remove_from_role(permission_id, role_id)
+            return Permission.remove_from_role(role_id, permission_id)
         end
     end
 end
