@@ -16,8 +16,7 @@ module Warrant
         # @option params [String] :user_id User defined string identifier for this user. If not provided, Warrant will create an id for the user and return it. In this case, you should store the id in your system as you will need to provide it for any authorization requests for that user. Note that userIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'. (optional)
         # @option params [String] :email Email address for this user. Designed to be used as a UI-friendly identifier. (optional)
         #
-        # @return [User] if user was created successfully
-        # @return [Hash] if request failed
+        # @return [User] created user
         #
         # @example Create a new User with the user id "test-customer"
         #   Warrant::User.create(user_id: "test-customer")
@@ -46,8 +45,7 @@ module Warrant
         #
         # @param user_id [String] User defined string identifier for this user. If not provided, Warrant will create an id for the user and return it. In this case, you should store the id in your system as you will need to provide it for any authorization requests for that user. Note that userIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'.
         #
-        # @return [void] if delete was successful
-        # @return [Hash] if request failed
+        # @return [nil] if delete was successful
         #
         # @example Delete a User with the user id "test-customer"
         #   Warrant::User.delete("test-customer")
@@ -70,8 +68,7 @@ module Warrant
 
         # Lists all users for your organization
         #
-        # @return [Array<User>] if users successfully retrieved
-        # @return [Hash] if request failed
+        # @return [Array<User>] all users for your organization
         #
         # @example List all users
         #   Warrant::User.list()
@@ -97,8 +94,7 @@ module Warrant
         #
         # @param user_id [String] User defined string identifier for this user. If not provided, Warrant will create an id for the user and return it. In this case, you should store the id in your system as you will need to provide it for any authorization requests for that user. Note that userIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'.
         #
-        # @return [User] if user was successfully retrieved
-        # @return [Hash] if request failed 
+        # @return [User] retrieved user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
@@ -124,8 +120,7 @@ module Warrant
         # @param [Hash] params attributes to update user with
         # @option params [String] :email Email address for this user. Designed to be used as a UI-friendly identifier. (optional)
         #
-        # @return [User] if user was successfully updated
-        # @return [Hash] if request failed 
+        # @return [User] updated user
         #
         # @example Update user "test-user"'s email
         #   Warrant::User.update("test-user", { email: "my-new-email@example.com" })
@@ -153,8 +148,7 @@ module Warrant
         #
         # @option params [String] :email Email address for this user. Designed to be used as a UI-friendly identifier. (optional)
         #
-        # @return [User] if user was successfully updated
-        # @return [Hash] if request failed 
+        # @return [User] updated user
         #
         # @example Update user "test-user"'s email
         #   user = Warrant::User.get("test-user")
@@ -173,8 +167,7 @@ module Warrant
 
         # List all roles for a user.
         #
-        # @return [Array<Role>] all roles for a specific user
-        # @return [Hash] if request failed 
+        # @return [Array<Role>] all roles for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidRequestError]
@@ -196,8 +189,7 @@ module Warrant
         #
         # @param role_id [String] The role_id of the role you want to assign to the user.
         #
-        # @return [Role] if role was successfully assigned
-        # @return [Hash] if request failed
+        # @return [Role] assigned role
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
@@ -224,8 +216,7 @@ module Warrant
         #
         # @param role_id [String] The role_id of the role you want to remove from the user.
         #
-        # @return [Role] if role was successfully removed
-        # @return [Hash] if request failed
+        # @return [nil] if role was successfully removed
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
@@ -243,8 +234,7 @@ module Warrant
 
         # List all permissions for a user 
         #
-        # @return [Array<Permission>] all permissions for a specific user
-        # @return [Hash] if request failed 
+        # @return [Array<Permission>] all permissions for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidRequestError]
@@ -266,8 +256,7 @@ module Warrant
         #
         # @param permission_id [String] The permission_id of the permission you want to assign to the user.
         #
-        # @return [Permission] if permission was successfully assigned
-        # @return [Hash] if request failed
+        # @return [Permission] assigned permission
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
@@ -294,8 +283,7 @@ module Warrant
         #
         # @param permission_id [String] The permission_id of the permission you want to remove from the user.
         #
-        # @return [Permission] if permission was successfully removed
-        # @return [Hash] if request failed
+        # @return [nil] if permission was successfully removed
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
@@ -316,7 +304,6 @@ module Warrant
         # @param permission_id [String] The permission_id of the permission you want to check whether or not it exists on the user.
         #
         # @return [Boolean] whether or not the user has the given permission
-        # @return [Hash] if request failed
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")

@@ -16,8 +16,7 @@ module Warrant
         # @option params [String] :tenant_id User defined string identifier for this tenant. If not provided, Warrant will create an id for the tenant and return it. In this case, you should store the id in your system for future reference. Note that tenantIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'. (optional)
         # @option params [String] :name A displayable name for this tenant. (optional)
         #
-        # @return [Tenant] if tenant was created successfully
-        # @return [Hash] if request failed
+        # @return [Tenant] created tenant
         #
         # @example Create a new Tenant with the tenant id "test-customer"
         #   Warrant::Tenant.create(tenant_id: "test-customer")
@@ -46,8 +45,7 @@ module Warrant
         #
         # @param tenant_id [String] User defined string identifier for this tenant. If not provided, Warrant will create an id for the tenant and return it. In this case, you should store the id in your system for future reference. Note that tenantIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'.
         #
-        # @return [void] if delete was successful
-        # @return [Hash] if request failed
+        # @return [nil] if delete was successful
         #
         # @example Delete a Tenant with the tenant id "test-customer"
         #   Warrant::Tenant.delete("test-customer")
@@ -70,8 +68,7 @@ module Warrant
 
         # Lists all tenants for your organization
         #
-        # @return [Array<Tenant>] if tenants successfully retrieved
-        # @return [Hash] if request failed
+        # @return [Array<Tenant>] all tenants for your organization
         #
         # @example List all tenants
         #   Warrant::Tenant.list()
@@ -97,8 +94,7 @@ module Warrant
         #
         # @param tenant_id [String] User defined string identifier for this tenant. If not provided, Warrant will create an id for the tenant and return it. In this case, you should store the id in your system for future reference. Note that tenantIds in Warrant must be composed of alphanumeric chars and/or '-', '_', and '@'.
         #
-        # @return [Tenant] if tenant was successfully retrieved
-        # @return [Hash] if request failed 
+        # @return [Tenant] retrieved tenant
         # 
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
@@ -124,8 +120,7 @@ module Warrant
         # @param [Hash] params attributes to update tenant with
         # @option params [String] :name A displayable name for this tenant. (optional)
         #
-        # @return [Tenant] if tenant was successfully updated
-        # @return [Hash] if request failed 
+        # @return [Tenant] updated tenant
         #
         # @example Update tenant "test-tenant"'s name
         #   Warrant::Tenant.update("test-tenant", { name: "my-new-name@example.com" })
@@ -153,8 +148,7 @@ module Warrant
         #
         # @option params [String] :name A displayable name for this tenant. (optional)
         #
-        # @return [Tenant] if tenant was successfully updated
-        # @return [Hash] if request failed 
+        # @return [Tenant] updated tenant
         #
         # @example Update tenant "test-tenant"'s name
         #   tenant = Warrant::Tenant.get("test-tenant")

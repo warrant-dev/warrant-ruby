@@ -13,8 +13,7 @@ module Warrant
         #
         # @option params [String] :role_id A string identifier for this new role. The role_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'. (optional)
         #
-        # @return [Role] if role was created successfully
-        # @return [Hash<Symbol, String>] if request failed
+        # @return [Role] created role
         #
         # @example Create a new Role with the role id "test-role"
         #   Warrant::Role.create(role_id: "test-role")
@@ -43,8 +42,7 @@ module Warrant
         #
         # @param role_id [String] A string identifier for this new role. The role_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'.
         #
-        # @return [void] if delete was successful
-        # @return [Hash] if request failed
+        # @return [nil] if delete was successful
         #
         # @example Delete a Role with the role id "test-role"
         #   Warrant::Role.delete("test-role")
@@ -67,8 +65,7 @@ module Warrant
 
         # Lists all roles for your organization
         #
-        # @return [Array<Role>] if roles successfully retrieved
-        # @return [Hash] if request failed
+        # @return [Array<Role>] all roles for your organization
         #
         # @example List all roles
         #   Warrant::Role.list()
@@ -94,8 +91,7 @@ module Warrant
         #
         # @param role_id [String] A string identifier for this new role. The role_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'.
         #
-        # @return [Role] if role was successfully retrieved
-        # @return [Hash] if request failed 
+        # @return [Role] retrieved role
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]

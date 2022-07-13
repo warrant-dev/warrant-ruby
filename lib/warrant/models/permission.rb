@@ -13,8 +13,7 @@ module Warrant
         #
         # @option params [String] :permission_id A string identifier for this new permission. The permission_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'. (optional)
         #
-        # @return [Permission] if permission was created successfully
-        # @return [Hash] if request failed
+        # @return [Permission] created permission
         #
         # @example Create a new Permission with the permission id "test-permission"
         #   Warrant::Permission.create(permission_id: "test-permission")
@@ -43,8 +42,7 @@ module Warrant
         #
         # @param permission_id [String] A string identifier for this new permission. The permission_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'.
         #
-        # @return [void] if delete was successful
-        # @return [Hash] if request failed
+        # @return [nil] if delete was successful
         #
         # @example Delete a Permission with the permission id "test-permission"
         #   Warrant::Permission.delete("test-permission")
@@ -67,8 +65,7 @@ module Warrant
 
         # Lists all permissions for your organization
         #
-        # @return [Array<Permission>] if permissions successfully retrieved
-        # @return [Hash] if request failed
+        # @return [Array<Permission>] all permissions for organization
         #
         # @example List all permissions
         #   Warrant::Permission.list()
@@ -94,8 +91,7 @@ module Warrant
         #
         # @param permission_id [String] A string identifier for this new permission. The permission_id can only be composed of lower-case alphanumeric chars and/or '-' and '_'.
         #
-        # @return [Permission] if permission was successfully retrieved
-        # @return [Hash] if request failed 
+        # @return [Permission] retrieved permission
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]

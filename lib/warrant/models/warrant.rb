@@ -22,8 +22,7 @@ module Warrant
         #   * :object_id (String) - The id of the specific object.	   
         #   * :relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #
-        # @return [Warrant] if warrant was created successfully
-        # @return [Hash] if request failed
+        # @return [Warrant] created warrant
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -56,8 +55,7 @@ module Warrant
         #   * :object_id [String] The id of the specific object.	   
         #   * :relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #
-        # @return [Warrant] if warrant was created successfully
-        # @return [Hash] if request failed
+        # @return [nil] if delete was successful
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
@@ -84,7 +82,6 @@ module Warrant
         # @option filters [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #
         # @return [Array<Warrant>] list of all warrants with provided filters
-        # @return [Hash] if request failed
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidRequestError]
@@ -120,7 +117,6 @@ module Warrant
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
-        # @return [Hash] if request failed
         #
         # @example Check whether user "5djfs6" can view the report with id "avk2837"
         #   Warrant::Warrant.is_authorized?(warrants: [{ object_type: "report", object_id: "avk2837", relation: "viewer", subject: { object_type: "user", object_id: "5djfs6" } }])
@@ -165,7 +161,6 @@ module Warrant
         # @param permission_id [String] Id of the permission to check on the user
         #
         # @return [Boolean] whether or not the user has the given permission
-        # @return [Hash] if request failed
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
