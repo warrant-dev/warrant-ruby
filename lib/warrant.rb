@@ -6,15 +6,17 @@ require "net/http"
 require "json"
 require "forwardable"
 
+require "warrant/api_operations"
+require "warrant/errors"
 require "warrant/models/permission"
 require "warrant/models/role"
+require "warrant/models/session"
+require "warrant/models/subject"
 require "warrant/models/tenant"
 require "warrant/models/user"
-require "warrant/models/userset"
 require "warrant/models/warrant"
 require "warrant/util"
 require "warrant/warrant_configuration"
-require "warrant/warrant_client"
 
 module Warrant
     @config = ::Warrant::WarrantConfiguration.new
