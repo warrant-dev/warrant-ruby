@@ -254,49 +254,44 @@ module Warrant
 
         # Assign a permission to a user
         #
-        # @param permission_id [String] The permission_id of the permission you want to assign to the user.
+        # @param user_id [String] The user_id of the user you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         #
         # @return [Permission] assigned permission
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
         #   user.assign_permission("edit-report")
+        def assign_permission(permission_id)
+            return Permission.assign_to_user(user_id, permission_id)
+        end
+
+        # Remove a permission from a user
+        #
+        # @param user_id [String] The user_id of the role you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
+        #
+        # @return [nil] if remove was successful
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def assign_permission(permission_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                res_json = JSON.parse(res.body)
-                Permission.new(res_json['permissionId'])
-            else
-                APIOperations.raise_error(res)
-            end
-        end
-
-        # Removes a permission from a user
-        #
-        # @param permission_id [String] The permission_id of the permission you want to remove from the user.
-        #
-        # @return [nil] if permission was successfully removed
         #
         # @example
         #   user = Warrant::User.get("fawa324nfa")
         #   user.remove_permission("edit-report")
         def remove_permission(permission_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Permission.remove_from_user(user_id, permission_id)
         end
 
         # Checks whether a user has a given permission

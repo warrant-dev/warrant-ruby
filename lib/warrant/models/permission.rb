@@ -159,5 +159,54 @@ module Warrant
                 APIOperations.raise_error(res)
             end  
         end
+
+        # Assign a permission to a user
+        #
+        # @param user_id [String] The user_id of the user you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
+        #
+        # @return [Permission] assigned permission
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.assign_to_user(user_id, permission_id)
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
+
+            case res
+            when Net::HTTPSuccess
+                permission = JSON.parse(res.body)
+                Permission.new(permission['permissionId'])
+            else
+                APIOperations.raise_error(res)
+            end  
+        end
+
+        # Remove a permission from a user
+        #
+        # @param user_id [String] The user_id of the role you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
+        #
+        # @return [nil] if remove was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::MissingRequiredParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.remove_from_user(user_id, permission_id)
+            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
+
+            case res
+            when Net::HTTPSuccess
+                return
+            else
+                APIOperations.raise_error(res)
+            end  
+        end
     end
 end
