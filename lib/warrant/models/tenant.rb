@@ -164,5 +164,71 @@ module Warrant
         def update(params = {})
             return Tenant.update(tenant_id, params)
         end
+
+        # Add a user to a tenant
+        #
+        # @param user_id [String] The user_id of the user you want to add to the tenant.
+        #
+        # @return [Warrant] warrant assigning user to the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def add_user(user_id)
+            return User.add_to_tenant(tenant_id, user_id)
+        end
+
+        # Remove a user from a tenant
+        #
+        # @param user_id [String] The user_id of the user you want to remove from the tenant.
+        #
+        # @return [nil] if remove was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def remove_user(user_id)
+            return User.remove_from_tenant(tenant_id, user_id)
+        end
+
+        # List all tenants for a user 
+        #
+        # @param user_id [String] The user_id of the user from which to fetch tenants
+        #
+        # @return [Array<Tenant>] all tenants for the user
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.list_for_user(user_id)
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/tenants"))
+
+            case res
+            when Net::HTTPSuccess
+                tenants = JSON.parse(res.body)
+                tenants.map{ |tenant| Tenant.new(tenant['tenantId'], tenant['name'], tenant['createdAt']) }
+            else
+                APIOperations.raise_error(res)
+            end   
+        end
+
+        # List all users for a tenant 
+        #
+        # @return [Array<User>] all users for the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def list_users
+            return User.list_for_tenant(tenant_id)
+        end
     end
 end

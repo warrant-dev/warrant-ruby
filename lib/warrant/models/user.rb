@@ -249,7 +249,6 @@ module Warrant
 
         # Assign a permission to a user
         #
-        # @param user_id [String] The user_id of the user you want to assign a permission to.
         # @param permission_id [String] The permission_id of the permission you want to assign to a user.
         #
         # @return [Permission] assigned permission
@@ -270,7 +269,6 @@ module Warrant
 
         # Remove a permission from a user
         #
-        # @param user_id [String] The user_id of the user you want to assign a permission to.
         # @param permission_id [String] The permission_id of the permission you want to assign to a user.
         #
         # @return [nil] if remove was successful
@@ -318,6 +316,90 @@ module Warrant
                     }
                 }]
             )
+        end
+
+        # Add a user to a tenant
+        #
+        # @param tenant_id [String] The tenant_id of the tenant you want to assign a user to.
+        # @param user_id [String] The user_id of the user you want to add to the tenant.
+        #
+        # @return [Warrant] warrant assigning user to the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.add_to_tenant(tenant_id, user_id)
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users/#{user_id}"))
+
+            case res
+            when Net::HTTPSuccess
+                res_json = JSON.parse(res.body)
+                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'])
+                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
+            else
+                APIOperations.raise_error(res)
+            end 
+        end
+
+        # Remove a user from a tenant
+        #
+        # @param tenant_id [String] The tenant_id of the tenant you want to remove the user from.
+        # @param user_id [String] The user_id of the user you want to remove from the tenant.
+        #
+        # @return [nil] if remove was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.remove_from_tenant(tenant_id, user_id)
+            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users/#{user_id}"))
+
+            case res
+            when Net::HTTPSuccess
+                return
+            else
+                APIOperations.raise_error(res)
+            end  
+        end
+
+        # List all users for a tenant 
+        #
+        # @param tenant_id [String] The tenant_id of the tenant from which to fetch users
+        #
+        # @return [Array<User>] all users for the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.list_for_tenant(tenant_id)
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users"))
+
+            case res
+            when Net::HTTPSuccess
+                users = JSON.parse(res.body)
+                users.map{ |user| User.new(user['userId'], user['email'], user['createdAt']) }
+            else
+                APIOperations.raise_error(res)
+            end 
+        end
+
+        # List all tenants for a user 
+        #
+        # @return [Array<Tenant>] all tenants for the user
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def list_tenants
+            return Tenant.list_for_user(user_id)
         end
     end
 end
