@@ -113,8 +113,8 @@ module Warrant
 
         # Assign a permission to a role
         #
-        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         # @param role_id [String] The role_id of the role you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         #
         # @return [Permission] assigned permission
         #
@@ -138,8 +138,8 @@ module Warrant
 
         # Remove a permission from a role
         #
-        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         # @param role_id [String] The role_id of the role you want to assign a permission to.
+        # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         #
         # @return [nil] if remove was successful
         #
