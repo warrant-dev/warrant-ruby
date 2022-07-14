@@ -367,5 +367,39 @@ module Warrant
                 APIOperations.raise_error(res)
             end  
         end
+
+        # List all users for a tenant 
+        #
+        # @param tenant_id [String] The tenant_id of the tenant from which to fetch users
+        #
+        # @return [Array<User>] all users for the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.list_for_tenant(tenant_id)
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users"))
+
+            case res
+            when Net::HTTPSuccess
+                users = JSON.parse(res.body)
+                users.map{ |user| User.new(user['userId'], user['email'], user['createdAt']) }
+            else
+                APIOperations.raise_error(res)
+            end 
+        end
+
+        # List all tenants for a user 
+        #
+        # @return [Array<Tenant>] all tenants for the user
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def list_tenants
+            return Tenant.list_for_user(user_id)
+        end
     end
 end
