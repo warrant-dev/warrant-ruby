@@ -164,5 +164,37 @@ module Warrant
         def update(params = {})
             return Tenant.update(tenant_id, params)
         end
+
+        # Add a user to a tenant
+        #
+        # @param user_id [String] The user_id of the user you want to add to the tenant.
+        #
+        # @return [Warrant] warrant assigning user to the tenant
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def add_user(user_id)
+            return User.add_to_tenant(tenant_id, user_id)
+        end
+
+        # Remove a user from a tenant
+        #
+        # @param user_id [String] The user_id of the user you want to remove from the tenant.
+        #
+        # @return [nil] if remove was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def remove_user(user_id)
+            return User.remove_from_tenant(tenant_id, user_id)
+        end
     end
 end
