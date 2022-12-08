@@ -108,7 +108,7 @@ module Warrant
         #
         # @option params [String] :object_type The type of object. Must be one of your system's existing object types. (optional)
         # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        # @option params [String] :subject The subject to query warrants for.
+        # @option params [String] :subject The subject to query warrants for. This should be in the format `OBJECT_TYPE:OBJECT_ID`, i.e. `user:8`
         #
         # @return [Array<Warrant>] list of all warrants with provided params
         #
