@@ -87,7 +87,7 @@ module Warrant
                 users.map{ |user| User.new(user['userId'], user['email'], user['createdAt']) }
             else
                 APIOperations.raise_error(res)
-            end   
+            end
         end
 
         # Get a user with the given user_id
@@ -111,7 +111,7 @@ module Warrant
                 User.new(user['userId'], user['email'], user['createdAt'])
             else
                 APIOperations.raise_error(res)
-            end  
+            end
         end
 
         # Updates a user with the given user_id and params
@@ -182,7 +182,7 @@ module Warrant
                 roles.map{ |role| Role.new(role['roleId']) }
             else
                 APIOperations.raise_error(res)
-            end 
+            end
         end
 
         # Assign a role to a user
@@ -227,7 +227,7 @@ module Warrant
             return Role.remove_from_user(user_id, role_id)
         end
 
-        # List all permissions for a user 
+        # List all permissions for a user
         #
         # @return [Array<Permission>] all permissions for the user
         #
@@ -244,7 +244,7 @@ module Warrant
                 permissions.map{ |permission| Permission.new(permission['permissionId']) }
             else
                 APIOperations.raise_error(res)
-            end 
+            end
         end
 
         # Assign a permission to a user
@@ -337,11 +337,11 @@ module Warrant
             case res
             when Net::HTTPSuccess
                 res_json = JSON.parse(res.body)
-                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'])
+                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
                 Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
             else
                 APIOperations.raise_error(res)
-            end 
+            end
         end
 
         # Remove a user from a tenant
@@ -365,10 +365,10 @@ module Warrant
                 return
             else
                 APIOperations.raise_error(res)
-            end  
+            end
         end
 
-        # List all users for a tenant 
+        # List all users for a tenant
         #
         # @param tenant_id [String] The tenant_id of the tenant from which to fetch users
         #
@@ -387,10 +387,10 @@ module Warrant
                 users.map{ |user| User.new(user['userId'], user['email'], user['createdAt']) }
             else
                 APIOperations.raise_error(res)
-            end 
+            end
         end
 
-        # List all tenants for a user 
+        # List all tenants for a user
         #
         # @return [Array<Tenant>] all tenants for the user
         #

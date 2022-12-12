@@ -39,7 +39,7 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'])
+                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
                 Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
             else
                 APIOperations.raise_error(res)
@@ -96,7 +96,7 @@ module Warrant
             when Net::HTTPSuccess
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'])
+                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
                     Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
                 }
             else
@@ -128,7 +128,7 @@ module Warrant
             when Net::HTTPSuccess
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'])
+                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
                     Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['isDirectMatch'])
                 }
             else
