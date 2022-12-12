@@ -32,6 +32,8 @@ module Warrant
                         new_opts[new_key] = normalize_params(v)
                     when Array
                         new_opts[new_key] = v.map { |i| normalize_params(i) }
+                    when Subject
+                        new_opts[new_key] = "#{v.object_type}:#{v.object_id}"
                     else
                         new_opts[new_key] = v
                     end

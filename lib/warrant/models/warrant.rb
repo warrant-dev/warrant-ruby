@@ -2,14 +2,15 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :is_direct_match
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject)
+        def initialize(object_type, object_id, relation, subject, is_direct_match = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
+            @is_direct_match = is_direct_match
         end
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
@@ -38,7 +39,7 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'])
+                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
                 Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
             else
                 APIOperations.raise_error(res)
@@ -95,8 +96,40 @@ module Warrant
             when Net::HTTPSuccess
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'])
+                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
                     Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
+                }
+            else
+                APIOperations.raise_error(res)
+            end
+        end
+
+        # Query to find all warrants for a given subject.
+        #
+        # @option params [String] :object_type The type of object. Must be one of your system's existing object types. (optional)
+        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @option params [String] :subject The subject to query warrants for. This should be in the format `OBJECT_TYPE:OBJECT_ID`, i.e. `user:8`
+        #   * subject (Hash) - The specific subject for which warrants will be queried for.
+        #       * object_type (String) - The type of object. Must be one of your system's existing object types.
+        #       * object_id (String) - The id of the specific object.
+        #
+        # @return [Array<Warrant>] list of all warrants with provided params
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.query(params = {})
+            params[:subject] = Subject.new_from_hash(params[:subject])
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/query"), params)
+
+            case res
+            when Net::HTTPSuccess
+                warrants = JSON.parse(res.body)
+                warrants.map{ |warrant|
+                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['isDirectMatch'])
                 }
             else
                 APIOperations.raise_error(res)
