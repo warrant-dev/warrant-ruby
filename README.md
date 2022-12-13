@@ -6,6 +6,7 @@ Use [Warrant](https://warrant.dev/) in ruby projects.
 [![Slack](https://img.shields.io/badge/slack-join-brightgreen)](https://join.slack.com/t/warrantcommunity/shared_invite/zt-12g84updv-5l1pktJf2bI5WIKN4_~f4w)
 
 ## Installation
+
 ---
 
 Add this line to your application's Gemfile:
@@ -27,17 +28,20 @@ You can also build the gem from source:
     $ gem build warrant.gemspec
 
 ## Documentation
+
 ---
 
 - [Ruby API Docs](https://rubydoc.info/gems/warrant)
 - [Warrant Docs](https://docs.warrant.dev/)
 
 ## Requirements
+
 ---
 
 - Ruby 2.3+.
 
 ## Usage
+
 ---
 
 ```ruby
@@ -48,9 +52,8 @@ Warrant.api_key = 'api_test_f5dsKVeYnVSLHGje44zAygqgqXiLJBICbFzCiAg1E='
 Warrant::User.create(user_id: "user123")
 
 # check whether user slp951 has view access to report 7asm24
-Warrant::Warrant.is_authorized?(object_type: "report", object_id: "7asm24", relation: "viewer", subject: { object_id: "user", object_id: "slp951" })
+Warrant::Warrant.is_authorized?(warrants: [{ object_type: "report", object_id: "7asm24", relation: "viewer", subject: { object_id: "user", object_id: "slp951" } }])
 ```
-
 
 We’ve used a random API key in these code examples. Replace it with your [actual publishable API keys](https://app.warrant.dev) to
 test this code through your own Warrant account.
