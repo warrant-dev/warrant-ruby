@@ -26,6 +26,6 @@ module Warrant
 
         attr_reader :config
 
-        def_delegators :@config, :api_key, :api_key=, :authorize_endpoint, :authorize_endpoint=
+        def_delegators :@config, :api_key, :api_key=, :api_base, :api_base=, :authorize_endpoint, :authorize_endpoint=
     end
 end
