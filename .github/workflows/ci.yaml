@@ -14,9 +14,9 @@ jobs:
         with:
           fetch-depth: 2
       - name: Setup Ruby Env
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.3.0'
+          ruby-version: '3.0'
           bundler-cache: true
       - name: Build
         run: rake test
