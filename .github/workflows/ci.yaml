@@ -19,4 +19,4 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Build
-        run: rake test
+        run: bundle exec rake test
