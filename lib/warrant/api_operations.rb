@@ -8,7 +8,8 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = use_ssl
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
+                    "User-Agent": "warrant-ruby/#{VERSION}"
                 }
                 http.post(uri.path, params.to_json, headers)
             end
@@ -18,6 +19,7 @@ module Warrant
                 http.use_ssl = true
                 request = Net::HTTP::Delete.new(uri.path)
                 request["Authorization"] = "ApiKey #{::Warrant.config.api_key}"
+                request["User-Agent"] = "warrant-ruby/#{VERSION}"
 
                 http.request(request, params.to_json)
             end
@@ -26,7 +28,8 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = true
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
+                    "User-Agent": "warrant-ruby/#{VERSION}"
                 }
 
                 unless params.empty?
@@ -41,7 +44,8 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = true
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}"
+                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
+                    "User-Agent": "warrant-ruby/#{VERSION}"
                 }
                 http.put(uri.path, params.to_json, headers)
             end
