@@ -56,6 +56,8 @@ module Warrant
                 case error_code
                 when Error::DUPLICATE_RECORD_ERROR
                     raise DuplicateRecordError.initialize_error_from_response(response)
+                when Error::FORBIDDEN_ERROR
+                    raise ForbiddenError.initialize_error_from_response(response)
                 when Error::INTERNAL_ERROR
                     raise InternalError.initialize_error_from_response(response)
                 when Error::INVALID_REQUEST_ERROR
