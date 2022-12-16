@@ -60,6 +60,9 @@ module Warrant
 
         # Lists all features for your organization
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] all features for your organization
         #
         # @example List all features
@@ -68,7 +71,7 @@ module Warrant
         # @raise [Warrant::InternalError]
         # @raise [Warrant::UnauthorizedError]
         def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/features"))
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/features"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -104,14 +107,16 @@ module Warrant
         # List features for tenant
         #
         # @param tenant_id [String] The tenant_id of the tenant to list features for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Feature>] assigned features for the tenant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_tenant(tenant_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/features"))
+        def self.list_for_tenant(tenant_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/features"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -172,14 +177,16 @@ module Warrant
         # List features for user
         #
         # @param user_id [String] The user_id of the user to list features for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Feature>] assigned features for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_user(user_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/features"))
+        def self.list_for_user(user_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/features"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -240,14 +247,16 @@ module Warrant
         # List features for pricing tier
         #
         # @param pricing_tier_id [String] The pricing_tier_id of the pricing tier to list features for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Feature>] assigned features for the pricing tier
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_pricing_tier(pricing_tier_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers/#{pricing_tier_id}/features"))
+        def self.list_for_pricing_tier(pricing_tier_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers/#{pricing_tier_id}/features"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess

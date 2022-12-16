@@ -60,6 +60,9 @@ module Warrant
 
         # Lists all pricing tiers for your organization
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] all pricing tiers for your organization
         #
         # @example List all pricing tiers
@@ -68,7 +71,7 @@ module Warrant
         # @raise [Warrant::InternalError]
         # @raise [Warrant::UnauthorizedError]
         def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers"))
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -105,14 +108,16 @@ module Warrant
         # List pricing tiers for tenant
         #
         # @param tenant_id [String] The tenant_id of the tenant to list pricing tiers for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<PricingTier>] assigned pricing tiers for the tenant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_tenant(tenant_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/pricing-tiers"))
+        def self.list_for_tenant(tenant_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/pricing-tiers"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -173,14 +178,16 @@ module Warrant
         # List pricing tiers for user
         #
         # @param user_id [String] The user_id of the user to list pricing tiers for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<PricingTier>] assigned pricing tiers for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_user(user_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/pricing-tiers"))
+        def self.list_for_user(user_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/pricing-tiers"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -240,13 +247,16 @@ module Warrant
 
         # List features for a pricing tier
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] assigned features for the pricing tier
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_features
-            return Feature.list_for_pricing_tier(pricing_tier_id)
+        def list_features(filters = {})
+            return Feature.list_for_pricing_tier(pricing_tier_id, filters)
         end
 
         # Assign a feature to a pricing tier

@@ -93,6 +93,9 @@ module Warrant
 
         # Lists all tenants for your organization
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Tenant>] all tenants for your organization
         #
         # @example List all tenants
@@ -102,7 +105,7 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
         def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants"))
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -213,14 +216,16 @@ module Warrant
         # List all tenants for a user
         #
         # @param user_id [String] The user_id of the user from which to fetch tenants
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Tenant>] all tenants for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_user(user_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/tenants"))
+        def self.list_for_user(user_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/tenants"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -245,13 +250,16 @@ module Warrant
 
         # List pricing tiers for a tenant
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] assigned pricing tiers for the tenant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_pricing_tiers
-            return PricingTier.list_for_tenant(tenant_id)
+        def list_pricing_tiers(filters = {})
+            return PricingTier.list_for_tenant(tenant_id, filters)
         end
 
         # Assign a pricing tier to a tenant
@@ -286,13 +294,16 @@ module Warrant
 
         # List features for a tenant
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] assigned features for the tenant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_features
-            return Feature.list_for_tenant(tenant_id)
+        def list_features(filters = {})
+            return Feature.list_for_tenant(tenant_id, filters)
         end
 
         # Assign a feature to a tenant

@@ -62,6 +62,9 @@ module Warrant
 
         # Lists all permissions for your organization
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Permission>] all permissions for your organization
         #
         # @example List all permissions
@@ -71,7 +74,7 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
         def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/permissions"))
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/permissions"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -164,14 +167,16 @@ module Warrant
         # List permissions for a role
         #
         # @param role_id [String] The role_id of the role to list assigned permissions for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Permission>] all assigned permissions for the role
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_role(role_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions"))
+        def self.list_for_role(role_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -233,14 +238,16 @@ module Warrant
         # List permissions for a user
         #
         # @param user_id [String] The user_id of the user to list assigned permissions for.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Permission>] all assigned permissions for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_user(user_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions"))
+        def self.list_for_user(user_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess

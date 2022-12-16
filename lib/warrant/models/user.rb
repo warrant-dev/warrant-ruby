@@ -94,6 +94,9 @@ module Warrant
 
         # Lists all users for your organization
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<User>] all users for your organization
         #
         # @example List all users
@@ -103,7 +106,7 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
         def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users"))
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/users"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -185,13 +188,16 @@ module Warrant
 
         # List all roles for a user.
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Role>] all roles for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_roles
-            return Role.list_for_user(user_id)
+        def list_roles(filters = {})
+            return Role.list_for_user(user_id, filters)
         end
 
         # Assign a role to a user
@@ -237,13 +243,16 @@ module Warrant
 
         # List all permissions for a user
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Permission>] all permissions for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_permissions
-            return Permission.list_for_user(user_id)
+        def list_permissions(filters = {})
+            return Permission.list_for_user(user_id, filters)
         end
 
         # Assign a permission to a user
@@ -310,14 +319,16 @@ module Warrant
         # List all users for a tenant
         #
         # @param tenant_id [String] The tenant_id of the tenant from which to fetch users
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<User>] all users for the tenant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def self.list_for_tenant(tenant_id)
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users"))
+        def self.list_for_tenant(tenant_id, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users"), Util.normalize_params(filters))
 
             case res
             when Net::HTTPSuccess
@@ -377,25 +388,31 @@ module Warrant
 
         # List all tenants for a user
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Tenant>] all tenants for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidRequestError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def list_tenants
-            return Tenant.list_for_user(user_id)
+        def list_tenants(filters = {})
+            return Tenant.list_for_user(user_id, filters)
         end
 
         # List pricing tiers for a user
+        #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<PricingTier>] assigned pricing tiers for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_pricing_tiers
-            return PricingTier.list_for_user(user_id)
+        def list_pricing_tiers(filters = {})
+            return PricingTier.list_for_user(user_id, filters)
         end
 
         # Assign a pricing tier to a user
@@ -430,13 +447,16 @@ module Warrant
 
         # List features for a user
         #
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        #
         # @return [Array<Feature>] assigned features for the user
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::UnauthorizedError]
-        def list_features
-            return Feature.list_for_user(user_id)
+        def list_features(filters = {})
+            return Feature.list_for_user(user_id, filters)
         end
 
         # Assign a feature to a user

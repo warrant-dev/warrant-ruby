@@ -81,6 +81,8 @@ module Warrant
         #   * subject (Hash) - The specific subject for which warrants will be queried for.
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
+        # @option params [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option params [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Warrant>] list of all warrants with provided params
         #
