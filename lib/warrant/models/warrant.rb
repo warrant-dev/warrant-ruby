@@ -29,7 +29,6 @@ module Warrant
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
@@ -59,9 +58,7 @@ module Warrant
         # @return [nil] if delete was successful
         #
         # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
@@ -71,34 +68,6 @@ module Warrant
             case res
             when Net::HTTPSuccess
                 return
-            else
-                APIOperations.raise_error(res)
-            end
-        end
-
-        # List all warrants for your organization.
-        #
-        # @option filters [String] :object_type The type of object. Must be one of your system's existing object types. (optional)
-        # @option filters [String] :object_id The id of the specific object. (optional)
-        # @option filters [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        #
-        # @return [Array<Warrant>] list of all warrants with provided filters
-        #
-        # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::NotFoundError]
-        # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
-        def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), filters)
-
-            case res
-            when Net::HTTPSuccess
-                warrants = JSON.parse(res.body)
-                warrants.map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
-                }
             else
                 APIOperations.raise_error(res)
             end
@@ -116,8 +85,8 @@ module Warrant
         # @return [Array<Warrant>] list of all warrants with provided params
         #
         # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.query(params = {})
@@ -167,11 +136,8 @@ module Warrant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.is_authorized?(params = {})
             unless ::Warrant.config.authorize_endpoint.nil?
                 return edge_authorize?(params)
@@ -191,11 +157,8 @@ module Warrant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.user_has_permission?(params = {})
             return is_authorized?(
                 warrants: [{
@@ -208,6 +171,37 @@ module Warrant
                     }
                 }],
                 consistentRead: params[:consistentRead],
+                debug: params[:debug]
+            )
+        end
+
+        # Checks whether a given subject has a given feature.
+        #
+        # @param subject (Hash) - The specific subject for which feature access will be checked.
+        #   * object_type (String) - The type of object. Must be one of your system's existing object types.
+        #   * object_id (String) - The id of the specific object.
+        # @param feature_id [String] Id of the feature to check on the subject
+        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the user has the given permission
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.has_feature?(params = {})
+            return is_authorized?(
+                warrants: [{
+                    object_type: "feature",
+                    object_id: params[:feature_id],
+                    relation: "member",
+                    subject: {
+                        object_type: params[:subject][:object_type],
+                        object_id: params[:subject][:object_id]
+                    }
+                }],
+                consistent_read: params[:consistent_read],
                 debug: params[:debug]
             )
         end
