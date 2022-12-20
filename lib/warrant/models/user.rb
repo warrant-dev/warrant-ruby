@@ -304,7 +304,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def has_permission?(permission_id)
+        def has_permission?(permission_id, context = nil)
             return Warrant.is_authorized?(
                 warrants: [{
                     object_type: "permission",
@@ -313,7 +313,8 @@ module Warrant
                     subject: {
                         object_type: "user",
                         object_id: user_id
-                    }
+                    },
+                    context: context
                 }]
             )
         end

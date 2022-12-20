@@ -2,14 +2,15 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject, :is_direct_match
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :context, :is_direct_match
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject, is_direct_match = nil)
+        def initialize(object_type, object_id, relation, subject, context = nil, is_direct_match = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
+            @context = context
             @is_direct_match = is_direct_match
         end
 
@@ -40,7 +41,7 @@ module Warrant
             case res
             when Net::HTTPSuccess
                 subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
-                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
+                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject, res_json['context'])
             else
                 APIOperations.raise_error(res)
             end
@@ -97,7 +98,7 @@ module Warrant
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'])
                 }
             else
                 APIOperations.raise_error(res)
@@ -129,7 +130,7 @@ module Warrant
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['isDirectMatch'])
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isDirectMatch'])
                 }
             else
                 APIOperations.raise_error(res)
@@ -205,9 +206,10 @@ module Warrant
                     subject: {
                         object_type: "user",
                         object_id: params[:user_id]
-                    }
+                    },
+                    context: params[:context]
                 }],
-                consistentRead: params[:consistentRead],
+                consistent_read: params[:consistent_read],
                 debug: params[:debug]
             )
         end
