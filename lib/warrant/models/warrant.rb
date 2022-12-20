@@ -119,7 +119,7 @@ module Warrant
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
