@@ -2,14 +2,15 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject, :is_direct_match
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :context, :is_direct_match
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject, is_direct_match = nil)
+        def initialize(object_type, object_id, relation, subject, context = nil, is_direct_match = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
+            @context = context
             @is_direct_match = is_direct_match
         end
 
@@ -39,7 +40,7 @@ module Warrant
             case res
             when Net::HTTPSuccess
                 subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
-                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
+                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject, res_json['context'])
             else
                 APIOperations.raise_error(res)
             end
@@ -100,7 +101,7 @@ module Warrant
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['isDirectMatch'])
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isDirectMatch'])
                 }
             else
                 APIOperations.raise_error(res)
@@ -119,6 +120,7 @@ module Warrant
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
         # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -153,6 +155,7 @@ module Warrant
         # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in.
         # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -177,7 +180,8 @@ module Warrant
                         subject: {
                             object_type: subject.warrant_object_type,
                             object_id: subject.warrant_object_id
-                        }
+                        },
+                        context: options[:context]
                     }],
                     consistent_read: options[:consistent_read],
                     debug: options[:debug]
@@ -192,7 +196,8 @@ module Warrant
                     subject: {
                         object_type: subject.warrant_object_type,
                         object_id: subject.warrant_object_id
-                    }
+                    },
+                    context: options[:context]
                 }],
                 consistent_read: options[:consistent_read],
                 debug: options[:debug]
@@ -206,6 +211,7 @@ module Warrant
         #   * object (WarrantObject) - Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         #   * subject (WarrantObject) Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in.
         # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -236,7 +242,8 @@ module Warrant
                     subject: {
                         object_type: warrant[:subject].warrant_object_type,
                         object_id: warrant[:subject].warrant_object_id
-                    }
+                    },
+                    context: warrant[:context]
                 }
             end
 
@@ -261,6 +268,7 @@ module Warrant
         #
         # @param user_id [String] Id of the user to check
         # @param permission_id [String] Id of the permission to check on the user
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
         # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -279,7 +287,8 @@ module Warrant
                     subject: {
                         object_type: "user",
                         object_id: params[:user_id]
-                    }
+                    },
+                    context: params[:context]
                 }],
                 consistentRead: params[:consistentRead],
                 debug: params[:debug]
@@ -292,6 +301,7 @@ module Warrant
         #   * object_type (String) - The type of object. Must be one of your system's existing object types.
         #   * object_id (String) - The id of the specific object.
         # @param feature_id [String] Id of the feature to check on the subject
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
         # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -310,7 +320,8 @@ module Warrant
                     subject: {
                         object_type: params[:subject][:object_type],
                         object_id: params[:subject][:object_id]
-                    }
+                    },
+                    context: params[:context]
                 }],
                 consistent_read: params[:consistent_read],
                 debug: params[:debug]
