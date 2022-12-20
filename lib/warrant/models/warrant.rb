@@ -148,6 +148,115 @@ module Warrant
             return authorize?(params)
         end
 
+        # Checks whether a specified access check is authorized or not.
+        #
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the given access check is authorized
+        #
+        # @example Check whether the user has "viewer" relation to report. `Report` and `User` here are both classes in your application that include `WarrantObject`.
+        #   my_report = Report.get("some-report")
+        #   current_user = User.get("llm-128")
+        #   Warrant::Warrant.is_authorized?(my_report, "viewer", current_user)
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.check(object, relation, subject, options = {})
+            unless ::Warrant.config.authorize_endpoint.nil?
+                return edge_authorize?(
+                    warrants: [{
+                        object_type: object.warrant_object_type,
+                        object_id: object.warrant_object_id,
+                        relation: relation,
+                        subject: {
+                            object_type: subject.warrant_object_type,
+                            object_id: subject.warrant_object_id
+                        }
+                    }],
+                    consistent_read: options[:consistent_read],
+                    debug: options[:debug]
+                )
+            end
+
+            return authorize?(
+                warrants: [{
+                    object_type: object.warrant_object_type,
+                    object_id: object.warrant_object_id,
+                    relation: relation,
+                    subject: {
+                        object_type: subject.warrant_object_type,
+                        object_id: subject.warrant_object_id
+                    }
+                }],
+                consistent_read: options[:consistent_read],
+                debug: options[:debug]
+            )
+        end
+
+        # Checks whether multiple access checks are authorized or not.
+        #
+        # @param op [String] Logical operator to perform on warrants. Can be 'anyOf' or 'allOf'.
+        # @param warrants [Array] Array of warrants to check access for.
+        #   * object (WarrantObject) - Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        #   * subject (WarrantObject) Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the given access check is authorized
+        #
+        # @example Check whether the current user has "viewer" relation to report and is a "member" of the customer account "superstore". `Report`, `CustomerAccount` and `User` here are all classes in your application that include `WarrantObject`.
+        #   my_report = Report.get("some-report")
+        #   customer_account = CustomerAccount.get("superstore")
+        #   current_user = User.get("llm-128")
+        #   Warrant::Warrant.check_many(
+        #       "allOf",
+        #       [
+        #           { object: my_report, relation: "viewer", subject: current_user },
+        #           { object: customer_account, relation: "member", subject: current_user }
+        #       ]
+        #   )
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.check_many(op, warrants, options = {})
+            normalized_warrants = warrants.map do |warrant|
+                {
+                    object_type: warrant[:object].warrant_object_type,
+                    object_id: warrant[:object].warrant_object_id,
+                    relation: warrant[:relation],
+                    subject: {
+                        object_type: warrant[:subject].warrant_object_type,
+                        object_id: warrant[:subject].warrant_object_id
+                    }
+                }
+            end
+
+            unless ::Warrant.config.authorize_endpoint.nil?
+                return edge_authorize?(
+                    op: op,
+                    warrants: normalized_warrants,
+                    consistent_read: options[:consistent_read],
+                    debug: options[:debug]
+                )
+            end
+
+            return authorize?(
+                op: op,
+                warrants: normalized_warrants,
+                consistent_read: options[:consistent_read],
+                debug: options[:debug]
+            )
+        end
+
         # Checks whether a given user has a given permission.
         #
         # @param user_id [String] Id of the user to check
