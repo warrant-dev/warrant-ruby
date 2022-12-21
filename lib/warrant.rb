@@ -6,9 +6,13 @@ require "net/http"
 require "json"
 require "forwardable"
 
+require "warrant/warrant_object"
+
 require "warrant/api_operations"
 require "warrant/errors"
+require "warrant/models/feature"
 require "warrant/models/permission"
+require "warrant/models/pricing_tier"
 require "warrant/models/role"
 require "warrant/models/session"
 require "warrant/models/subject"
@@ -26,6 +30,6 @@ module Warrant
 
         attr_reader :config
 
-        def_delegators :@config, :api_key, :api_key=, :authorize_endpoint, :authorize_endpoint=
+        def_delegators :@config, :api_key, :api_key=, :api_base, :api_base=, :authorize_endpoint, :authorize_endpoint=
     end
 end

@@ -15,28 +15,29 @@ module Warrant
                     .downcase
             end
 
-            def normalize_options(opts)
-                new_opts = opts.each_with_object({}) do |(k, v), new_opts|
-                    new_key = Util.camelcase(k.to_s)
-
-                    new_opts[new_key] = v
-                end
-            end
-
             def normalize_params(params)
-                new_opts = params.each_with_object({}) do |(k, v), new_opts|
-                    new_key = Util.camelcase(k.to_s)
+                params.compact!
 
-                    case v
-                    when Hash
-                        new_opts[new_key] = normalize_params(v)
-                    when Array
-                        new_opts[new_key] = v.map { |i| normalize_params(i) }
-                    when Subject
-                        new_opts[new_key] = "#{v.object_type}:#{v.object_id}"
-                    else
-                        new_opts[new_key] = v
+                case params
+                when Hash
+                    params.each_with_object({}) do |(k, v), new_opts|
+                        new_key = Util.camelcase(k.to_s)
+
+                        case v
+                        when Hash
+                            new_opts[new_key] = normalize_params(v)
+                        when Array
+                            new_opts[new_key] = v.map { |i| normalize_params(i) }
+                        when Subject
+                            new_opts[new_key] = "#{v.object_type}:#{v.object_id}"
+                        else
+                            new_opts[new_key] = v
+                        end
                     end
+                when Array
+                    params.map { |i| normalize_params(i) }
+                else
+                    params
                 end
             end
         end

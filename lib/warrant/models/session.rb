@@ -6,7 +6,7 @@ module Warrant
         #
         # @option params [String] :user_id Id of the user to create a session for.
         # @option params [Integer] :ttl Number of seconds a session should live for. By default session tokens live for 24 hours and self service tokens live for 30 minutes.
-        # 
+        #
         # @return [String] Session token
         #
         # @raise [Warrant::InternalError]
@@ -15,7 +15,6 @@ module Warrant
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.create_authorization_session(params = {})
             params = params.merge(type: "sess")
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), Util.normalize_params(params))
@@ -36,15 +35,15 @@ module Warrant
         # @option params [String] :tenant_id Id of the tenant to create a session for
         # @option params [Integer] :ttl Number of seconds a session should live for. By default session tokens live for 24 hours and self service tokens live for 30 minutes.
         #
-        # @return [String] URL to the self service dashboard 
-        # 
+        # @return [String] URL to the self service dashboard
+        #
+        # @raise [Warrant::ForbiddenError]
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::InvalidRequestError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.create_self_service_session(redirect_url, params = {})
             params = params.merge(type: "ssdash")
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), Util.normalize_params(params))

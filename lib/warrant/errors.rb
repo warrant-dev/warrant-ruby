@@ -3,6 +3,7 @@
 module Warrant
     class Error
         DUPLICATE_RECORD_ERROR = "duplicate_record"
+        FORBIDDEN_ERROR = "forbidden"
         INTERNAL_ERROR = "internal_error"
         INVALID_REQUEST_ERROR = "invalid_request"
         INVALID_PARAMETER_ERROR = "invalid_parameter"
@@ -38,6 +39,7 @@ module Warrant
     end
 
     class DuplicateRecordError < WarrantError; end
+    class ForbiddenError < WarrantError; end
     class InternalError < WarrantError; end
     class InvalidRequestError < WarrantError; end
     class InvalidParameterError < WarrantError; end

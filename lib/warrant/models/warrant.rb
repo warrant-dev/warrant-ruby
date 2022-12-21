@@ -2,26 +2,24 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject, :is_direct_match
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :context, :is_direct_match
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject, is_direct_match = nil)
+        def initialize(object_type, object_id, relation, subject, context = nil, is_direct_match = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
+            @context = context
             @is_direct_match = is_direct_match
         end
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
         #
-        # @option params [String] :object_type The type of object. Must be one of your system's existing object types.
-        # @option params [String] :object_id The id of the specific object.
-        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option params [Hash] :subject The specific subject (object, user etc.) to be associated with the object. A subject can either be a specific object (by id) or a group of objects defined by a set containing an objectType, objectId and relation.
-        #   * :object_type (String) - The type of object. Must be one of your system's existing object types.
-        #   * :object_id (String) - The id of the specific object.
-        #   * :relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be created for. (optional)
         #
         # @return [Warrant] created warrant
         #
@@ -29,18 +27,27 @@ module Warrant
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.create(params = {})
+        def self.create(object, relation, subject, context = nil)
+            params = {
+                object_type: object.warrant_object_type,
+                object_id: object.warrant_object_id,
+                relation: relation,
+                subject: {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                },
+                context: context
+            }
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
             res_json = JSON.parse(res.body)
 
             case res
             when Net::HTTPSuccess
                 subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
-                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
+                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject, res_json['context'])
             else
                 APIOperations.raise_error(res)
             end
@@ -48,57 +55,34 @@ module Warrant
 
         # Deletes a warrant specified by the combination of object_type, object_id, relation, and subject.
         #
-        # @option params [String] :object_type The type of object. Must be one of your system's existing object types.
-        # @option params [String] :object_id The id of the specific object.
-        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option params [Hash] :subject The specific subject (object, user etc.) to be associated with the object. A subject can either be a specific object (by id) or a group of objects defined by a set containing an objectType, objectId and relation.
-        #   * :object_type [String] The type of object. Must be one of your system's existing object types.
-        #   * :object_id [String] The id of the specific object.
-        #   * :relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be deleted in. (optional)
         #
         # @return [nil] if delete was successful
         #
         # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.delete(params = {})
+        def self.delete(object, relation, subject, context = nil)
+            params = {
+                object_type: object.warrant_object_type,
+                object_id: object.warrant_object_id,
+                relation: relation,
+                subject: {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                },
+                context: context
+            }
             res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
 
             case res
             when Net::HTTPSuccess
                 return
-            else
-                APIOperations.raise_error(res)
-            end
-        end
-
-        # List all warrants for your organization.
-        #
-        # @option filters [String] :object_type The type of object. Must be one of your system's existing object types. (optional)
-        # @option filters [String] :object_id The id of the specific object. (optional)
-        # @option filters [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        #
-        # @return [Array<Warrant>] list of all warrants with provided filters
-        #
-        # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::NotFoundError]
-        # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
-        def self.list(filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), filters)
-
-            case res
-            when Net::HTTPSuccess
-                warrants = JSON.parse(res.body)
-                warrants.map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject)
-                }
             else
                 APIOperations.raise_error(res)
             end
@@ -112,12 +96,14 @@ module Warrant
         #   * subject (Hash) - The specific subject for which warrants will be queried for.
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
+        # @option params [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option params [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
         # @return [Array<Warrant>] list of all warrants with provided params
         #
         # @raise [Warrant::InternalError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.query(params = {})
@@ -129,7 +115,7 @@ module Warrant
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['isDirectMatch'])
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isDirectMatch'])
                 }
             else
                 APIOperations.raise_error(res)
@@ -148,7 +134,8 @@ module Warrant
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
+        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
@@ -167,11 +154,8 @@ module Warrant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.is_authorized?(params = {})
             unless ::Warrant.config.authorize_endpoint.nil?
                 return edge_authorize?(params)
@@ -180,10 +164,142 @@ module Warrant
             return authorize?(params)
         end
 
+        # Checks whether a specified access check is authorized or not.
+        #
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional) (optional)
+        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the given access check is authorized
+        #
+        # @example Check whether the user has "viewer" relation to report. `Report` and `User` here are both classes in your application that include `WarrantObject`.
+        #   my_report = Report.get("some-report")
+        #   current_user = User.get("llm-128")
+        #   Warrant::Warrant.is_authorized?(my_report, "viewer", current_user)
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.check(object, relation, subject, options = {})
+            if subject.instance_of?(Subject)
+                subject = {
+                    object_type: subject.object_type,
+                    object_id: subject.object_id,
+                    relation: subject.relation
+                }.compact!
+            else
+                subject = {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                }
+            end
+
+            unless ::Warrant.config.authorize_endpoint.nil?
+                return edge_authorize?(
+                    warrants: [{
+                        object_type: object.warrant_object_type,
+                        object_id: object.warrant_object_id,
+                        relation: relation,
+                        subject: subject,
+                        context: options[:context]
+                    }],
+                    consistent_read: options[:consistent_read],
+                    debug: options[:debug]
+                )
+            end
+
+            return authorize?(
+                warrants: [{
+                    object_type: object.warrant_object_type,
+                    object_id: object.warrant_object_id,
+                    relation: relation,
+                    subject: subject,
+                    context: options[:context]
+                }],
+                consistent_read: options[:consistent_read],
+                debug: options[:debug]
+            )
+        end
+
+        # Checks whether multiple access checks are authorized or not.
+        #
+        # @param op [String] Logical operator to perform on warrants. Can be 'anyOf' or 'allOf'.
+        # @param warrants [Array] Array of warrants to check access for.
+        #   * object (WarrantObject) - Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        #   * subject (WarrantObject) Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
+        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the given access check is authorized
+        #
+        # @example Check whether the current user has "viewer" relation to report and is a "member" of the customer account "superstore". `Report`, `CustomerAccount` and `User` here are all classes in your application that include `WarrantObject`.
+        #   my_report = Report.get("some-report")
+        #   customer_account = CustomerAccount.get("superstore")
+        #   current_user = User.get("llm-128")
+        #   Warrant::Warrant.check_many(
+        #       "allOf",
+        #       [
+        #           { object: my_report, relation: "viewer", subject: current_user },
+        #           { object: customer_account, relation: "member", subject: current_user }
+        #       ]
+        #   )
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.check_many(op, warrants, options = {})
+            normalized_warrants = warrants.map do |warrant|
+                if warrant[:subject].instance_of?(Subject)
+                    subject = {
+                        object_type: warrant[:subject].object_type,
+                        object_id: warrant[:subject].object_id,
+                        relation: warrant[:subject].relation
+                    }.compact!
+                else
+                    subject = {
+                        object_type: warrant[:subject].warrant_object_type,
+                        object_id: warrant[:subject].warrant_object_id
+                    }
+                end
+
+                {
+                    object_type: warrant[:object].warrant_object_type,
+                    object_id: warrant[:object].warrant_object_id,
+                    relation: warrant[:relation],
+                    subject: subject,
+                    context: warrant[:context]
+                }
+            end
+
+            unless ::Warrant.config.authorize_endpoint.nil?
+                return edge_authorize?(
+                    op: op,
+                    warrants: normalized_warrants,
+                    consistent_read: options[:consistent_read],
+                    debug: options[:debug]
+                )
+            end
+
+            return authorize?(
+                op: op,
+                warrants: normalized_warrants,
+                consistent_read: options[:consistent_read],
+                debug: options[:debug]
+            )
+        end
+
         # Checks whether a given user has a given permission.
         #
         # @param user_id [String] Id of the user to check
         # @param permission_id [String] Id of the permission to check on the user
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
         # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -191,11 +307,8 @@ module Warrant
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
-        # @raise [Warrant::InvalidRequestError]
-        # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        # @raise [Warrant::WarrantError]
         def self.user_has_permission?(params = {})
             return is_authorized?(
                 warrants: [{
@@ -205,9 +318,43 @@ module Warrant
                     subject: {
                         object_type: "user",
                         object_id: params[:user_id]
-                    }
+                    },
+                    context: params[:context]
                 }],
                 consistentRead: params[:consistentRead],
+                debug: params[:debug]
+            )
+        end
+
+        # Checks whether a given subject has a given feature.
+        #
+        # @param subject (Hash) - The specific subject for which feature access will be checked.
+        #   * object_type (String) - The type of object. Must be one of your system's existing object types.
+        #   * object_id (String) - The id of the specific object.
+        # @param feature_id [String] Id of the feature to check on the subject
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
+        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
+        # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
+        #
+        # @return [Boolean] whether or not the user has the given permission
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.has_feature?(params = {})
+            return is_authorized?(
+                warrants: [{
+                    object_type: "feature",
+                    object_id: params[:feature_id],
+                    relation: "member",
+                    subject: {
+                        object_type: params[:subject][:object_type],
+                        object_id: params[:subject][:object_id]
+                    },
+                    context: params[:context]
+                }],
+                consistent_read: params[:consistent_read],
                 debug: params[:debug]
             )
         end
