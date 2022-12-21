@@ -16,6 +16,8 @@ module Warrant
             end
 
             def normalize_params(params)
+                params.compact!
+
                 case params
                 when Hash
                     params.each_with_object({}) do |(k, v), new_opts|

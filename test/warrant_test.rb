@@ -5,7 +5,7 @@ require "test_helper"
 class WarrantTest < Minitest::Test
   def test_create
     stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
-            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"},\"context\":null}")
+            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"}}")
             .to_return(body: '{"objectType": "pricing-tier", "objectId": "enterprise", "relation": "member", "subject": { "objectType": "user", "objectId": "11" }}')
 
     pricing_tier = OpenStruct.new(warrant_object_type: "pricing-tier", warrant_object_id: "enterprise")
@@ -22,7 +22,7 @@ class WarrantTest < Minitest::Test
 
   def test_delete
     stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
-            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"},\"context\":null}")
+            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"}}")
 
     pricing_tier = OpenStruct.new(warrant_object_type: "pricing-tier", warrant_object_id: "enterprise")
     user = OpenStruct.new(warrant_object_type: "user", warrant_object_id: "11")
