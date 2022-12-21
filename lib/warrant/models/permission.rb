@@ -155,15 +155,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def update(params = {})
-            res = APIOperations.put(URI.parse("#{::Warrant.config.api_base}/v1/permissions/#{permission_id}"), Util.normalize_params(params))
-
-            case res
-            when Net::HTTPSuccess
-                res_json = JSON.parse(res.body)
-                Permission.new(res_json['permissionId'], res_json['name'], res_json['description'])
-            else
-                APIOperations.raise_error(res)
-            end
+            return Permission.update(permission_id, params)
         end
 
         # List permissions for a role
