@@ -16,13 +16,10 @@ module Warrant
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
         #
-        # @option params [String] :object_type The type of object. Must be one of your system's existing object types.
-        # @option params [String] :object_id The id of the specific object.
-        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option params [Hash] :subject The specific subject (object, user etc.) to be associated with the object. A subject can either be a specific object (by id) or a group of objects defined by a set containing an objectType, objectId and relation.
-        #   * :object_type (String) - The type of object. Must be one of your system's existing object types.
-        #   * :object_id (String) - The id of the specific object.
-        #   * :relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be created for. (optional)
         #
         # @return [Warrant] created warrant
         #
@@ -33,7 +30,17 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.create(params = {})
+        def self.create(object, relation, subject, context = nil)
+            params = {
+                object_type: object.warrant_object_type,
+                object_id: object.warrant_object_id,
+                relation: relation,
+                subject: {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                },
+                context: context
+            }
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
             res_json = JSON.parse(res.body)
 
@@ -48,13 +55,10 @@ module Warrant
 
         # Deletes a warrant specified by the combination of object_type, object_id, relation, and subject.
         #
-        # @option params [String] :object_type The type of object. Must be one of your system's existing object types.
-        # @option params [String] :object_id The id of the specific object.
-        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option params [Hash] :subject The specific subject (object, user etc.) to be associated with the object. A subject can either be a specific object (by id) or a group of objects defined by a set containing an objectType, objectId and relation.
-        #   * :object_type [String] The type of object. Must be one of your system's existing object types.
-        #   * :object_id [String] The id of the specific object.
-        #   * :relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
+        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be deleted in. (optional)
         #
         # @return [nil] if delete was successful
         #
@@ -63,7 +67,17 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.delete(params = {})
+        def self.delete(object, relation, subject, context = nil)
+            params = {
+                object_type: object.warrant_object_type,
+                object_id: object.warrant_object_id,
+                relation: relation,
+                subject: {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                },
+                context: context
+            }
             res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
 
             case res
@@ -120,7 +134,7 @@ module Warrant
         #       * object_type (String) - The type of object. Must be one of your system's existing object types.
         #       * object_id (String) - The id of the specific object.
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
         # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -155,7 +169,7 @@ module Warrant
         # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
-        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in.
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional) (optional)
         # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -211,7 +225,7 @@ module Warrant
         #   * object (WarrantObject) - Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         #   * subject (WarrantObject) Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
-        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in.
+        # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
         # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -268,7 +282,7 @@ module Warrant
         #
         # @param user_id [String] Id of the user to check
         # @param permission_id [String] Id of the permission to check on the user
-        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
         # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
@@ -301,7 +315,7 @@ module Warrant
         #   * object_type (String) - The type of object. Must be one of your system's existing object types.
         #   * object_id (String) - The id of the specific object.
         # @param feature_id [String] Id of the feature to check on the subject
-        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in.
+        # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
         # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #

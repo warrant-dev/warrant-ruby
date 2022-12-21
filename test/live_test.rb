@@ -438,15 +438,7 @@ class LiveTest < Minitest::Test
 
         assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user)
 
-        Warrant::Warrant.create(
-            object_type: "permission",
-            object_id: new_permission.permission_id,
-            relation: "member",
-            subject: {
-                object_type: "user",
-                object_id: new_user.user_id
-            }
-        )
+        Warrant::Warrant.create(new_permission, "member", new_user)
 
         assert_equal true, Warrant::Warrant.check(new_permission, "member", new_user)
 
@@ -457,15 +449,7 @@ class LiveTest < Minitest::Test
         assert_equal "permission-1", query_warrants[0].object_id
         assert_equal "member", query_warrants[0].relation
 
-        Warrant::Warrant.delete(
-            object_type: "permission",
-            object_id: new_permission.permission_id,
-            relation: "member",
-            subject: {
-                object_type: "user",
-                object_id: new_user.user_id
-            }
-        )
+        Warrant::Warrant.delete(new_permission, "member", new_user)
 
         assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user)
 

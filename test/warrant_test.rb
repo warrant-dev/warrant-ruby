@@ -5,10 +5,12 @@ require "test_helper"
 class WarrantTest < Minitest::Test
   def test_create
     stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
-            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"}}")
+            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"},\"context\":null}")
             .to_return(body: '{"objectType": "pricing-tier", "objectId": "enterprise", "relation": "member", "subject": { "objectType": "user", "objectId": "11" }}')
 
-    created_warrant = Warrant::Warrant.create(object_type: "pricing-tier", object_id: "enterprise", relation: "member", subject: { object_type: "user", object_id: "11" })
+    pricing_tier = OpenStruct.new(warrant_object_type: "pricing-tier", warrant_object_id: "enterprise")
+    user = OpenStruct.new(warrant_object_type: "user", warrant_object_id: "11")
+    created_warrant = Warrant::Warrant.create(pricing_tier, "member", user)
 
     assert_equal "pricing-tier", created_warrant.object_type
     assert_equal "enterprise", created_warrant.object_id
@@ -20,9 +22,11 @@ class WarrantTest < Minitest::Test
 
   def test_delete
     stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
-            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"}}")
+            .with(body: "{\"objectType\":\"pricing-tier\",\"objectId\":\"enterprise\",\"relation\":\"member\",\"subject\":{\"objectType\":\"user\",\"objectId\":\"11\"},\"context\":null}")
 
-    assert_nil Warrant::Warrant.delete(object_type: "pricing-tier", object_id: "enterprise", relation: "member", subject: { object_type: "user", object_id: "11" })
+    pricing_tier = OpenStruct.new(warrant_object_type: "pricing-tier", warrant_object_id: "enterprise")
+    user = OpenStruct.new(warrant_object_type: "user", warrant_object_id: "11")
+    assert_nil Warrant::Warrant.delete(pricing_tier, "member", user)
   end
 
   def test_query
