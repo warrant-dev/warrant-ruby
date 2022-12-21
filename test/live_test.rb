@@ -316,6 +316,7 @@ class LiveTest < Minitest::Test
         Warrant::Feature.assign_to_pricing_tier(free_tier.pricing_tier_id, feature1.feature_id)
         Warrant::PricingTier.assign_to_user(free_user.user_id, free_tier.pricing_tier_id)
 
+        assert_equal true, free_tier.has_feature?("feature-1")
         assert_equal true, free_user.has_feature?("feature-1")
 
         free_tier_features = free_tier.list_features
@@ -370,7 +371,7 @@ class LiveTest < Minitest::Test
 
         assert_equal true, paid_tenant.has_feature?(custom_feature.feature_id)
 
-        paid_tenant_features = paid_tenant.list_features
+        paid_tenant_features = Warrant::Feature.list_for_tenant(paid_tenant.tenant_id)
 
         assert_equal 1, paid_tenant_features.length
         assert_equal "custom-feature", paid_tenant_features[0].feature_id
@@ -436,13 +437,16 @@ class LiveTest < Minitest::Test
 
     def test_warrants
         new_user = Warrant::User.create
+        new_tenant = Warrant::Tenant.create(tenant_id: "tenant-1")
         new_permission = Warrant::Permission.create(permission_id: "permission-1", name: "Permission 1", description: "some permission")
 
         assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user)
 
+        # Assign permission to user
         Warrant::Warrant.create(new_permission, "member", new_user)
 
         assert_equal true, Warrant::Warrant.check(new_permission, "member", new_user)
+        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: "permission", object_id: new_permission.permission_id, relation: "member", subject: { object_type: "user", object_id: new_user.user_id }}])
 
         query_warrants = Warrant::Warrant.query(subject: { object_type: "user", object_id: new_user.user_id }, page: 1, limit: 100)
 
@@ -451,11 +455,22 @@ class LiveTest < Minitest::Test
         assert_equal "permission-1", query_warrants[0].object_id
         assert_equal "member", query_warrants[0].relation
 
+        # Assign user to tenant
+        Warrant::Warrant.create(new_tenant, "member", new_user)
+
+        assert_equal true, Warrant::Warrant.check(new_tenant, "member", new_user)
+        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: "tenant", object_id: new_tenant.tenant_id, relation: "member", subject: { object_type: "user", object_id: new_user.user_id }}])
+
+        assert_equal true, Warrant::Warrant.check_many("allOf", [{ object: new_permission, relation: "member", subject: new_user }, { object: new_tenant, relation: "member", subject: new_user }])
+
         Warrant::Warrant.delete(new_permission, "member", new_user)
+        Warrant::Warrant.delete(new_tenant, "member", new_user)
 
         assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user)
+        assert_equal false, Warrant::Warrant.check(new_tenant, "member", new_user)
 
         Warrant::User.delete(new_user.user_id)
+        Warrant::Tenant.delete(new_tenant.tenant_id)
         Warrant::Permission.delete(new_permission.permission_id)
     end
 end
