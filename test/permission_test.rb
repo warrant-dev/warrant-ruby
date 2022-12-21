@@ -21,7 +21,7 @@ class PermissionTest < Minitest::Test
         assert_nil Warrant::Permission.delete("some-permission")
     end
 
-     def test_list
+    def test_list
         stub_request(:get, "#{Warrant.config.api_base}/v1/permissions")
             .to_return(body: '[{"permissionId": "permission-1", "name": null, "description": null}, {"permissionId": "permission-2", "name": "Second Permission", "description": null}]')
 

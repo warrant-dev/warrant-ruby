@@ -19,7 +19,7 @@ class FeatureTest < Minitest::Test
         assert_nil Warrant::Feature.delete("basic")
     end
 
-     def test_list
+    def test_list
         stub_request(:get, "#{Warrant.config.api_base}/v1/features")
             .to_return(body: '[{"featureId": "feature-1"}, {"featureId": "feature-2"}]')
 

@@ -19,7 +19,7 @@ class PricingTierTest < Minitest::Test
         assert_nil Warrant::PricingTier.delete("basic")
     end
 
-     def test_list
+    def test_list
         stub_request(:get, "#{Warrant.config.api_base}/v1/pricing-tiers")
             .to_return(body: '[{"pricingTierId": "basic"}, {"pricingTierId": "enterprise"}]')
 

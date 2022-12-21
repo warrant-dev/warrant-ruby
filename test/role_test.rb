@@ -21,7 +21,7 @@ class RoleTest < Minitest::Test
         assert_nil Warrant::Role.delete("some-role")
     end
 
-     def test_list
+    def test_list
         stub_request(:get, "#{Warrant.config.api_base}/v1/roles")
             .to_return(body: '[{"roleId": "role-1", "name": null, "description": null}, {"roleId": "role-2", "name": "Second Role", "description": null}]')
 
