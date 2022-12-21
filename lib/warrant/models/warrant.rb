@@ -186,39 +186,16 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         def self.check(object, relation, subject, options = {})
             if subject.instance_of?(Subject)
-                unless ::Warrant.config.authorize_endpoint.nil?
-                    return edge_authorize?(
-                        warrants: [{
-                            object_type: object.warrant_object_type,
-                            object_id: object.warrant_object_id,
-                            relation: relation,
-                            subject: {
-                                object_type: subject.object_type,
-                                object_id: subject.object_id,
-                                relation: subject.relation
-                            },
-                            context: options[:context]
-                        }],
-                        consistent_read: options[:consistent_read],
-                        debug: options[:debug]
-                    )
-                end
-
-                return authorize?(
-                    warrants: [{
-                        object_type: object.warrant_object_type,
-                        object_id: object.warrant_object_id,
-                        relation: relation,
-                        subject: {
-                            object_type: subject.object_type,
-                            object_id: subject.object_id,
-                            relation: subject.relation
-                        },
-                        context: options[:context]
-                    }],
-                    consistent_read: options[:consistent_read],
-                    debug: options[:debug]
-                )
+                subject = {
+                    object_type: subject.object_type,
+                    object_id: subject.object_id,
+                    relation: subject.relation
+                }.compact!
+            else
+                subject = {
+                    object_type: subject.warrant_object_type,
+                    object_id: subject.warrant_object_id
+                }
             end
 
             unless ::Warrant.config.authorize_endpoint.nil?
@@ -227,10 +204,7 @@ module Warrant
                         object_type: object.warrant_object_type,
                         object_id: object.warrant_object_id,
                         relation: relation,
-                        subject: {
-                            object_type: subject.warrant_object_type,
-                            object_id: subject.warrant_object_id
-                        },
+                        subject: subject,
                         context: options[:context]
                     }],
                     consistent_read: options[:consistent_read],
@@ -243,10 +217,7 @@ module Warrant
                     object_type: object.warrant_object_type,
                     object_id: object.warrant_object_id,
                     relation: relation,
-                    subject: {
-                        object_type: subject.warrant_object_type,
-                        object_id: subject.warrant_object_id
-                    },
+                    subject: subject,
                     context: options[:context]
                 }],
                 consistent_read: options[:consistent_read],
@@ -285,29 +256,26 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         def self.check_many(op, warrants, options = {})
             normalized_warrants = warrants.map do |warrant|
-                if warrant.instance_of?(Subject)
-                    {
-                        object_type: warrant[:object].warrant_object_type,
-                        object_id: warrant[:object].warrant_object_id,
-                        relation: warrant[:relation],
-                        subject: {
-                            object_type: warrant[:subject].object_type,
-                            object_id: warrant[:subject].object_id
-                        },
-                        context: warrant[:context]
-                    }
+                if warrant[:subject].instance_of?(Subject)
+                    subject = {
+                        object_type: warrant[:subject].object_type,
+                        object_id: warrant[:subject].object_id,
+                        relation: warrant[:subject].relation
+                    }.compact!
                 else
-                    {
-                        object_type: warrant[:object].warrant_object_type,
-                        object_id: warrant[:object].warrant_object_id,
-                        relation: warrant[:relation],
-                        subject: {
-                            object_type: warrant[:subject].warrant_object_type,
-                            object_id: warrant[:subject].warrant_object_id
-                        },
-                        context: warrant[:context]
+                    subject = {
+                        object_type: warrant[:subject].warrant_object_type,
+                        object_id: warrant[:subject].warrant_object_id
                     }
                 end
+
+                {
+                    object_type: warrant[:object].warrant_object_type,
+                    object_id: warrant[:object].warrant_object_id,
+                    relation: warrant[:relation],
+                    subject: subject,
+                    context: warrant[:context]
+                }
             end
 
             unless ::Warrant.config.authorize_endpoint.nil?
