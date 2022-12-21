@@ -185,6 +185,42 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.check(object, relation, subject, options = {})
+            if subject.instance_of?(Subject)
+                unless ::Warrant.config.authorize_endpoint.nil?
+                    return edge_authorize?(
+                        warrants: [{
+                            object_type: object.warrant_object_type,
+                            object_id: object.warrant_object_id,
+                            relation: relation,
+                            subject: {
+                                object_type: subject.object_type,
+                                object_id: subject.object_id,
+                                relation: subject.relation
+                            },
+                            context: options[:context]
+                        }],
+                        consistent_read: options[:consistent_read],
+                        debug: options[:debug]
+                    )
+                end
+
+                return authorize?(
+                    warrants: [{
+                        object_type: object.warrant_object_type,
+                        object_id: object.warrant_object_id,
+                        relation: relation,
+                        subject: {
+                            object_type: subject.object_type,
+                            object_id: subject.object_id,
+                            relation: subject.relation
+                        },
+                        context: options[:context]
+                    }],
+                    consistent_read: options[:consistent_read],
+                    debug: options[:debug]
+                )
+            end
+
             unless ::Warrant.config.authorize_endpoint.nil?
                 return edge_authorize?(
                     warrants: [{
@@ -249,16 +285,29 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         def self.check_many(op, warrants, options = {})
             normalized_warrants = warrants.map do |warrant|
-                {
-                    object_type: warrant[:object].warrant_object_type,
-                    object_id: warrant[:object].warrant_object_id,
-                    relation: warrant[:relation],
-                    subject: {
-                        object_type: warrant[:subject].warrant_object_type,
-                        object_id: warrant[:subject].warrant_object_id
-                    },
-                    context: warrant[:context]
-                }
+                if warrant.instance_of?(Subject)
+                    {
+                        object_type: warrant[:object].warrant_object_type,
+                        object_id: warrant[:object].warrant_object_id,
+                        relation: warrant[:relation],
+                        subject: {
+                            object_type: warrant[:subject].object_type,
+                            object_id: warrant[:subject].object_id
+                        },
+                        context: warrant[:context]
+                    }
+                else
+                    {
+                        object_type: warrant[:object].warrant_object_type,
+                        object_id: warrant[:object].warrant_object_id,
+                        relation: warrant[:relation],
+                        subject: {
+                            object_type: warrant[:subject].warrant_object_type,
+                            object_id: warrant[:subject].warrant_object_id
+                        },
+                        context: warrant[:context]
+                    }
+                end
             end
 
             unless ::Warrant.config.authorize_endpoint.nil?
