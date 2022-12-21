@@ -2,6 +2,8 @@
 
 module Warrant
     class Role
+        include Warrant::WarrantObject
+
         attr_reader :role_id, :name, :description
 
         # @!visibility private
@@ -279,6 +281,14 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def remove_permission(permission_id)
             return Permission.remove_from_role(role_id, permission_id)
+        end
+
+        def warrant_object_type
+            "role"
+        end
+
+        def warrant_object_id
+            role_id
         end
     end
 end

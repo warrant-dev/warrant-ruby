@@ -2,6 +2,8 @@
 
 module Warrant
     class PricingTier
+        include Warrant::WarrantObject
+
         attr_reader :pricing_tier_id
 
         # @!visibility private
@@ -313,6 +315,14 @@ module Warrant
                 consistent_read: opts[:consistent_read],
                 debug: opts[:debug]
             )
+        end
+
+        def warrant_object_type
+            "pricing-tier"
+        end
+
+        def warrant_object_id
+            pricing_tier_id
         end
     end
 end

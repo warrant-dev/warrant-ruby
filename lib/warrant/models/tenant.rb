@@ -2,6 +2,8 @@
 
 module Warrant
     class Tenant
+        include Warrant::WarrantObject
+
         attr_reader :tenant_id, :name, :created_at
 
         # @!visibility private
@@ -360,6 +362,14 @@ module Warrant
                 consistent_read: opts[:consistent_read],
                 debug: opts[:debug]
             )
+        end
+
+        def warrant_object_type
+            "tenant"
+        end
+
+        def warrant_object_id
+            tenant_id
         end
     end
 end

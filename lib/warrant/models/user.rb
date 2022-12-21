@@ -2,6 +2,8 @@
 
 module Warrant
     class User
+        include Warrant::WarrantObject
+
         attr_reader :user_id, :email, :created_at
 
         # @!visibility private
@@ -517,6 +519,14 @@ module Warrant
                 consistent_read: opts[:consistent_read],
                 debug: opts[:debug]
             )
+        end
+
+        def warrant_object_type
+            "user"
+        end
+
+        def warrant_object_id
+            user_id
         end
     end
 end

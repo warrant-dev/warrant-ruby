@@ -2,6 +2,8 @@
 
 module Warrant
     class Permission
+        include Warrant::WarrantObject
+
         attr_reader :permission_id, :name, :description
 
         # @!visibility private
@@ -304,6 +306,14 @@ module Warrant
             else
                 APIOperations.raise_error(res)
             end
+        end
+
+        def warrant_object_type
+            "permission"
+        end
+
+        def warrant_object_id
+            permission_id
         end
     end
 end

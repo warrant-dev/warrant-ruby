@@ -2,6 +2,8 @@
 
 module Warrant
     class Feature
+        include Warrant::WarrantObject
+
         attr_reader :feature_id
 
         # @!visibility private
@@ -312,6 +314,14 @@ module Warrant
             else
                 APIOperations.raise_error(res)
             end
+        end
+
+        def warrant_object_type
+            "feature"
+        end
+
+        def warrant_object_id
+            feature_id
         end
     end
 end
