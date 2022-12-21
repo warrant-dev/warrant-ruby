@@ -197,8 +197,8 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def add_user(user_id)
-            return User.add_to_tenant(tenant_id, user_id)
+        def assign_user(user_id)
+            return User.assign_to_tenant(tenant_id, user_id)
         end
 
         # Remove a user from a tenant

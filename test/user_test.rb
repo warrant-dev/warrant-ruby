@@ -166,7 +166,7 @@ class UserTest < Minitest::Test
         stub_request(:post, "#{Warrant.config.api_base}/v1/tenants/my-store/users/new-employee")
         .to_return(body: '{"objectType": "tenant", "objectId": "my-store", "relation": "member", "subject": { "objectType": "user", "objectId": "new-employee" }}')
 
-        warrant = Warrant::User.add_to_tenant("my-store", "new-employee")
+        warrant = Warrant::User.assign_to_tenant("my-store", "new-employee")
 
         assert_equal "tenant", warrant.object_type
         assert_equal "my-store", warrant.object_id
@@ -180,7 +180,7 @@ class UserTest < Minitest::Test
         .to_raise(Warrant::InternalError)
 
         assert_raises Warrant::InternalError do
-        Warrant::User.add_to_tenant("my-store", "new-employee")
+        Warrant::User.assign_to_tenant("my-store", "new-employee")
         end
     end
 

@@ -357,7 +357,7 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.add_to_tenant(tenant_id, user_id)
+        def self.assign_to_tenant(tenant_id, user_id)
             res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users/#{user_id}"))
 
             case res

@@ -190,7 +190,7 @@ class LiveTest < Minitest::Test
         tenant1_users = tenant1.list_users
         assert_equal 0, tenant1_users.length
 
-        tenant1.add_user(user1.user_id)
+        tenant1.assign_user(user1.user_id)
 
         user1_tenants = user1.list_tenants
         assert_equal 1, user1_tenants.length
@@ -424,7 +424,7 @@ class LiveTest < Minitest::Test
         user = Warrant::User.create
         tenant = Warrant::Tenant.create
 
-        Warrant::User.add_to_tenant(tenant.tenant_id, user.user_id)
+        Warrant::User.assign_to_tenant(tenant.tenant_id, user.user_id)
         Warrant::Permission.assign_to_user(user.user_id, "view-self-service-dashboard")
 
         assert Warrant::Session.create_authorization_session(user_id: user.user_id)
