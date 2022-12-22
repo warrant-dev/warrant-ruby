@@ -32,12 +32,12 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(object, relation, subject, context = nil)
             params = {
-                object_type: object.warrant_object_type,
-                object_id: object.warrant_object_id,
+                object_type: object.warrant_object_type.to_s,
+                object_id: object.warrant_object_id.to_s,
                 relation: relation,
                 subject: {
-                    object_type: subject.warrant_object_type,
-                    object_id: subject.warrant_object_id
+                    object_type: subject.warrant_object_type.to_s,
+                    object_id: subject.warrant_object_id.to_s
                 },
                 context: context
             }
@@ -69,12 +69,12 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.delete(object, relation, subject, context = nil)
             params = {
-                object_type: object.warrant_object_type,
-                object_id: object.warrant_object_id,
+                object_type: object.warrant_object_type.to_s,
+                object_id: object.warrant_object_id.to_s,
                 relation: relation,
                 subject: {
-                    object_type: subject.warrant_object_type,
-                    object_id: subject.warrant_object_id
+                    object_type: subject.warrant_object_type.to_s,
+                    object_id: subject.warrant_object_id.to_s
                 },
                 context: context
             }
@@ -193,16 +193,16 @@ module Warrant
                 }.compact!
             else
                 subject = {
-                    object_type: subject.warrant_object_type,
-                    object_id: subject.warrant_object_id
+                    object_type: subject.warrant_object_type.to_s,
+                    object_id: subject.warrant_object_id.to_s
                 }
             end
 
             unless ::Warrant.config.authorize_endpoint.nil?
                 return edge_authorize?(
                     warrants: [{
-                        object_type: object.warrant_object_type,
-                        object_id: object.warrant_object_id,
+                        object_type: object.warrant_object_type.to_s,
+                        object_id: object.warrant_object_id.to_s,
                         relation: relation,
                         subject: subject,
                         context: options[:context]
@@ -214,8 +214,8 @@ module Warrant
 
             return authorize?(
                 warrants: [{
-                    object_type: object.warrant_object_type,
-                    object_id: object.warrant_object_id,
+                    object_type: object.warrant_object_type.to_s,
+                    object_id: object.warrant_object_id.to_s,
                     relation: relation,
                     subject: subject,
                     context: options[:context]
@@ -264,14 +264,14 @@ module Warrant
                     }.compact!
                 else
                     subject = {
-                        object_type: warrant[:subject].warrant_object_type,
-                        object_id: warrant[:subject].warrant_object_id
+                        object_type: warrant[:subject].warrant_object_type.to_s,
+                        object_id: warrant[:subject].warrant_object_id.to_s
                     }
                 end
 
                 {
-                    object_type: warrant[:object].warrant_object_type,
-                    object_id: warrant[:object].warrant_object_id,
+                    object_type: warrant[:object].warrant_object_type.to_s,
+                    object_id: warrant[:object].warrant_object_id.to_s,
                     relation: warrant[:relation],
                     subject: subject,
                     context: warrant[:context]
