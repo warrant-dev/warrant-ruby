@@ -2,16 +2,16 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject, :context, :is_direct_match
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :context, :is_implicit
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject, context = nil, is_direct_match = nil)
+        def initialize(object_type, object_id, relation, subject, context = nil, is_implicit = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
             @context = context
-            @is_direct_match = is_direct_match
+            @is_implicit = is_implicit
         end
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
@@ -90,14 +90,9 @@ module Warrant
 
         # Query to find all warrants for a given subject.
         #
-        # @option params [String] :object_type The type of object. Must be one of your system's existing object types. (optional)
-        # @option params [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
-        # @option params [String] :subject The subject to query warrants for. This should be in the format `OBJECT_TYPE:OBJECT_ID`, i.e. `user:8`
-        #   * subject (Hash) - The specific subject for which warrants will be queried for.
-        #       * object_type (String) - The type of object. Must be one of your system's existing object types.
-        #       * object_id (String) - The id of the specific object.
-        # @option params [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
-        # @option params [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        # @option params [String] :select Specifies the type of results to be returned by the query. Optionally, the `explicit` keyword can be provided (i.e. `explicit warrants`) to specify that only explicit results be returned. By default, both implicit and explicit results are returned.
+        # @option params [String] :for A list of conditions specifying which resources to query results for (i.e. "get all warrants **for role:admin**"). Only those warrants matching **all** of the conditions in the `for` clause are selected. If the `explicit` keyword is not specified in the `select` param, the resulting warrants are then expanded to determine if they imply other warrants (i.e. "the owner of a report is also an editor of that report"). Must be zero or more comma separated values in the format `object|relation|subject|context = val`. For object and subject filters, you can filter on all object ids by using the `*` character (i.e. `role:*`). (optional)
+        # @option params [String] :where A list of conditions to be applied to the result set before it is returned. If a where clause is provided, the query will only return results matching **all** conditions. Must be zero or more comma separated values in the format `object|relation|subject|context = val``. For object and subject filters, you can filter on all object ids by using the `*` character, i.e. `role:*`. (optional)
         #
         # @return [Array<Warrant>] list of all warrants with provided params
         #
@@ -107,7 +102,6 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.query(params = {})
-            params[:subject] = Subject.new_from_hash(params[:subject])
             res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/query"), params)
 
             case res
@@ -115,7 +109,7 @@ module Warrant
                 warrants = JSON.parse(res.body)
                 warrants.map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isDirectMatch'])
+                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isImplicit'])
                 }
             else
                 APIOperations.raise_error(res)
