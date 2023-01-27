@@ -30,25 +30,27 @@ class WarrantTest < Minitest::Test
   end
 
   def test_query
-    stub_request(:get, "#{Warrant.config.api_base}/v1/query?select=warrants&for=subject=user:11&where=subject=user:11")
-      .to_return(body: '[{"objectType": "tenant", "objectId": "store-1", "relation": "member", "subject": {"objectType": "user", "objectId": "8"}, "isImplicit": false}, {"objectType": "feature", "objectId": "edit-items", "relation": "member", "subject": {"objectType": "user", "objectId": "8"}, "isImplicit": true}]')
+    stub_request(:get, "#{Warrant.config.api_base}/v1/query?q=SELECT%20warrant%20FOR%20subject=user:11%20WHERE%20subject=user:11")
+      .to_return(body: "{\"result\": [{\"objectType\": \"tenant\", \"objectId\": \"store-1\", \"relation\": \"member\", \"subject\": {\"objectType\": \"user\", \"objectId\": \"8\"}, \"isImplicit\": false}, {\"objectType\": \"feature\", \"objectId\": \"edit-items\", \"relation\": \"member\", \"subject\": {\"objectType\": \"user\", \"objectId\": \"8\"}, \"isImplicit\": true}], \"meta\": {} }")
 
-    warrants = Warrant::Warrant.query(select: "warrants", for: "subject=user:11", where: "subject=user:11")
+    warrant_query = Warrant::WarrantQuery.new
+    warrant_query.select("warrant").for(subject: "user:11").where(subject: "user:11")
+    warrants = Warrant::Warrant.query(warrant_query)
 
-    assert_equal 2, warrants.length
+    assert_equal 2, warrants['result'].length
 
-    assert_equal "tenant", warrants[0].object_type
-    assert_equal "store-1", warrants[0].object_id
-    assert_equal "member", warrants[0].relation
-    assert_equal "user", warrants[0].subject.object_type
-    assert_equal "8", warrants[0].subject.object_id
-    assert_equal false, warrants[0].is_implicit
+    assert_equal "tenant", warrants['result'][0].object_type
+    assert_equal "store-1", warrants['result'][0].object_id
+    assert_equal "member", warrants['result'][0].relation
+    assert_equal "user", warrants['result'][0].subject.object_type
+    assert_equal "8", warrants['result'][0].subject.object_id
+    assert_equal false, warrants['result'][0].is_implicit
 
-    assert_equal "feature", warrants[1].object_type
-    assert_equal "edit-items", warrants[1].object_id
-    assert_equal "member", warrants[1].relation
-    assert_equal "user", warrants[1].subject.object_type
-    assert_equal "8", warrants[1].subject.object_id
-    assert_equal true, warrants[1].is_implicit
+    assert_equal "feature", warrants['result'][1].object_type
+    assert_equal "edit-items", warrants['result'][1].object_id
+    assert_equal "member", warrants['result'][1].relation
+    assert_equal "user", warrants['result'][1].subject.object_type
+    assert_equal "8", warrants['result'][1].subject.object_id
+    assert_equal true, warrants['result'][1].is_implicit
   end
 end

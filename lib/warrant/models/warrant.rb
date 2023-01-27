@@ -88,29 +88,67 @@ module Warrant
             end
         end
 
-        # Query to find all warrants for a given subject.
+        # Query to find all warrants for a given object or subject.
         #
-        # @option params [String] :select Specifies the type of results to be returned by the query. Optionally, the `explicit` keyword can be provided (i.e. `explicit warrants`) to specify that only explicit results be returned. By default, both implicit and explicit results are returned.
-        # @option params [String] :for A list of conditions specifying which resources to query results for (i.e. "get all warrants **for role:admin**"). Only those warrants matching **all** of the conditions in the `for` clause are selected. If the `explicit` keyword is not specified in the `select` param, the resulting warrants are then expanded to determine if they imply other warrants (i.e. "the owner of a report is also an editor of that report"). Must be zero or more comma separated values in the format `object|relation|subject|context = val`. For object and subject filters, you can filter on all object ids by using the `*` character (i.e. `role:*`). (optional)
-        # @option params [String] :where A list of conditions to be applied to the result set before it is returned. If a where clause is provided, the query will only return results matching **all** conditions. Must be zero or more comma separated values in the format `object|relation|subject|context = val``. For object and subject filters, you can filter on all object ids by using the `*` character, i.e. `role:*`. (optional)
+        # @param warrant_query [WarrantQuery] Query to run for a set of warrants.
+        # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
+        # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
-        # @return [Array<Warrant>] list of all warrants with provided params
+        # @return [Hash] Query result with `result` listing warrants returned and `meta` with selected object types.
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.query(params = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/query"), params)
+        def self.query(warrant_query = WarrantQuery.new, filters = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/query"), { "q": warrant_query.to_query_param, **filters })
 
             case res
             when Net::HTTPSuccess
-                warrants = JSON.parse(res.body)
-                warrants.map{ |warrant|
+                query_result = JSON.parse(res.body)
+                query_result['result'] = query_result['result'].map{ |warrant|
                     subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
                     Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isImplicit'])
                 }
+
+                if query_result['meta']['feature']
+                    query_result['meta']['feature'].each{ |featureId, feature|
+                        query_result['meta']['feature'][featureId] = Feature.new(feature['featureId'])
+                    }
+                end
+
+                if query_result['meta']['pricing-tier']
+                    query_result['meta']['pricing-tier'].each{ |pricingTierId, pricingTier|
+                        query_result['meta']['pricing-tier'][pricingTierId] = PricingTier.new(pricingTier['pricingTierId'])
+                    }
+                end
+
+                if query_result['meta']['permission']
+                    query_result['meta']['permission'].each{ |permissionId, permission|
+                        query_result['meta']['permission'][permissionId] = Permission.new(permission['permissionId'], permission['name'], permission['description'])
+                    }
+                end
+
+                if query_result['meta']['role']
+                    query_result['meta']['role'].each{ |roleId, role|
+                        query_result['meta']['role'][roleId] = Role.new(role['roleId'], role['name'], role['description'])
+                    }
+                end
+
+                if query_result['meta']['user']
+                    query_result['meta']['user'].each{ |userId, user|
+                        query_result['meta']['user'][userId] = User.new(user['userId'], user['email'], user['createdAt'])
+                    }
+                end
+
+                if query_result['meta']['tenant']
+                    query_result['meta']['tenant'].each{ |tenantId, tenant|
+                        query_result['meta']['tenant'][tenantId] = Tenant.new(tenant['tenantId'], tenant['name'], tenant['createdAt'])
+                    }
+                end
+
+                query_result
             else
                 APIOperations.raise_error(res)
             end
