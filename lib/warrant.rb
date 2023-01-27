@@ -7,6 +7,7 @@ require "json"
 require "forwardable"
 
 require "warrant/warrant_object"
+require "warrant/warrant_query"
 
 require "warrant/api_operations"
 require "warrant/errors"
