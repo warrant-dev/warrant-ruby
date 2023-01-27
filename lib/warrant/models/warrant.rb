@@ -94,7 +94,7 @@ module Warrant
         # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
         # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
-        # @return [Hash] Query result with `result` listing warrants returned and `meta` with selected object types.
+        # @return [Hash] Query result with `result` listing warrants returned and `meta` with metadata for the selected object types.
         #
         # @raise [Warrant::InternalError]
         # @raise [Warrant::InvalidParameterError]
