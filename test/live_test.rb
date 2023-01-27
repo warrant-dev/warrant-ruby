@@ -448,12 +448,14 @@ class LiveTest < Minitest::Test
         assert_equal true, Warrant::Warrant.check(new_permission, "member", new_user)
         assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: "permission", object_id: new_permission.permission_id, relation: "member", subject: { object_type: "user", object_id: new_user.user_id }}])
 
-        query_warrants = Warrant::Warrant.query(subject: { object_type: "user", object_id: new_user.user_id }, page: 1, limit: 100)
+        warrant_query = Warrant::WarrantQuery.new
+        warrant_query.select("warrant", "permission").for(subject: "user:#{new_user.user_id}")
+        query_warrants = Warrant::Warrant.query(warrant_query, page: 1, limit: 100)
 
-        assert_equal 1, query_warrants.length
-        assert_equal "permission", query_warrants[0].object_type
-        assert_equal "permission-1", query_warrants[0].object_id
-        assert_equal "member", query_warrants[0].relation
+        assert_equal 1, query_warrants['result'].length
+        assert_equal "permission", query_warrants['result'][0].object_type
+        assert_equal "permission-1", query_warrants['result'][0].object_id
+        assert_equal "member", query_warrants['result'][0].relation
 
         # Assign user to tenant
         Warrant::Warrant.create(new_tenant, "member", new_user)
