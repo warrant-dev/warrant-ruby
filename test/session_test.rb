@@ -15,10 +15,10 @@ class SessionTest < Minitest::Test
 
     def test_create_self_service_session
         stub_request(:post, "#{Warrant.config.api_base}/v1/sessions")
-            .with(body: "{\"userId\":\"10\",\"type\":\"ssdash\"}")
+            .with(body: "{\"userId\":\"10\",\"tenantId\":\"2\",\"selfServiceStrategy\":\"rbac\",\"type\":\"ssdash\"}")
             .to_return(body: '{"token": "aj92rn3anra8af!@"}')
 
-        session_url = Warrant::Session.create_self_service_session("www.myapp.com/home", user_id: "10")
+        session_url = Warrant::Session.create_self_service_session("www.myapp.com/home", user_id: "10", tenant_id: "2", self_service_strategy: "rbac")
 
         assert_equal "#{::Warrant.config.self_service_dash_url_base}/aj92rn3anra8af!@?redirectUrl=www.myapp.com/home", session_url
     end

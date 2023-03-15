@@ -33,6 +33,7 @@ module Warrant
         # @param redirect_url [String] URL to redirect to once self-service session is created
         # @option params [String] :user_id Id of the user to create a session for.
         # @option params [String] :tenant_id Id of the tenant to create a session for
+        # @option params [String] :self_service_strategy Determines whether a self-service token can be used for managing user roles and permissions (`rbac`) or managing fine-grained user access to a particular object (`fgac`)
         # @option params [Integer] :ttl Number of seconds a session should live for. By default session tokens live for 24 hours and self service tokens live for 30 minutes.
         #
         # @return [String] URL to the self service dashboard

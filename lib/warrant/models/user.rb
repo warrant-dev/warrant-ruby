@@ -2,6 +2,8 @@
 
 module Warrant
     class User
+        OBJECT_TYPE = "user"
+
         include Warrant::WarrantObject
 
         attr_reader :user_id, :email, :created_at
@@ -358,16 +360,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, user_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users/#{user_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                res_json = JSON.parse(res.body)
-                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
-                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject)
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: Tenant::OBJECT_TYPE, object_id: tenant_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a user from a tenant
@@ -382,14 +375,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, user_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/users/#{user_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: Tenant::OBJECT_TYPE, object_id: tenant_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List all tenants for a user

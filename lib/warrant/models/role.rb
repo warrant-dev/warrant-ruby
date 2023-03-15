@@ -2,6 +2,8 @@
 
 module Warrant
     class Role
+        OBJECT_TYPE = "role"
+
         include Warrant::WarrantObject
 
         attr_reader :role_id, :name, :description
@@ -186,7 +188,7 @@ module Warrant
         # @param user_id [String] The user_id of the user you want to assign a role to.
         # @param role_id [String] The role_id of the role you want to assign to a user.
         #
-        # @return [Role] assigned role
+        # @return [Warrant] warrant assigning role to user
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -195,15 +197,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, role_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                role = JSON.parse(res.body)
-                Role.new(role['roleId'], role['name'], role['description'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: Role::OBJECT_TYPE, object_id: role_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a role from a user
@@ -220,14 +214,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, role_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/roles/#{role_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: Role::OBJECT_TYPE, object_id: role_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List assigned permissions for the role

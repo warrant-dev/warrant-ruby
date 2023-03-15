@@ -16,9 +16,9 @@ module Warrant
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
         #
-        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param object [WarrantObject | Hash] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param subject [WarrantObject | Hash] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
         # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be created for. (optional)
         #
         # @return [Warrant] created warrant
@@ -32,12 +32,12 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.create(object, relation, subject, context = nil)
             params = {
-                object_type: object.warrant_object_type.to_s,
-                object_id: object.warrant_object_id.to_s,
+                object_type: object.respond_to?(:warrant_object_type) ? object.warrant_object_type.to_s : object[:object_type],
+                object_id: object.respond_to?(:warrant_object_id) ? object.warrant_object_id.to_s : object[:object_id],
                 relation: relation,
                 subject: {
-                    object_type: subject.warrant_object_type.to_s,
-                    object_id: subject.warrant_object_id.to_s
+                    object_type: subject.respond_to?(:warrant_object_type) ? subject.warrant_object_type.to_s : subject[:object_type],
+                    object_id: subject.respond_to?(:warrant_object_id) ? subject.warrant_object_id.to_s : subject[:object_id]
                 },
                 context: context
             }
@@ -55,9 +55,9 @@ module Warrant
 
         # Deletes a warrant specified by the combination of object_type, object_id, relation, and subject.
         #
-        # @param object [WarrantObject] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param object [WarrantObject | Hash] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
+        # @param subject [WarrantObject | Hash] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
         # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be deleted in. (optional)
         #
         # @return [nil] if delete was successful
@@ -69,12 +69,12 @@ module Warrant
         # @raise [Warrant::WarrantError]
         def self.delete(object, relation, subject, context = nil)
             params = {
-                object_type: object.warrant_object_type.to_s,
-                object_id: object.warrant_object_id.to_s,
+                object_type: object.respond_to?(:warrant_object_type) ? object.warrant_object_type.to_s : object[:object_type],
+                object_id: object.respond_to?(:warrant_object_id) ? object.warrant_object_id.to_s : object[:object_id],
                 relation: relation,
                 subject: {
-                    object_type: subject.warrant_object_type.to_s,
-                    object_id: subject.warrant_object_id.to_s
+                    object_type: subject.respond_to?(:warrant_object_type) ? subject.warrant_object_type.to_s : subject[:object_type],
+                    object_id: subject.respond_to?(:warrant_object_id) ? subject.warrant_object_id.to_s : subject[:object_id]
                 },
                 context: context
             }
@@ -344,11 +344,11 @@ module Warrant
         def self.user_has_permission?(params = {})
             return is_authorized?(
                 warrants: [{
-                    object_type: "permission",
+                    object_type: Permission::OBJECT_TYPE,
                     object_id: params[:permission_id],
                     relation: "member",
                     subject: {
-                        object_type: "user",
+                        object_type: User::OBJECT_TYPE,
                         object_id: params[:user_id]
                     },
                     context: params[:context]
@@ -377,7 +377,7 @@ module Warrant
         def self.has_feature?(params = {})
             return is_authorized?(
                 warrants: [{
-                    object_type: "feature",
+                    object_type: Feature::OBJECT_TYPE,
                     object_id: params[:feature_id],
                     relation: "member",
                     subject: {

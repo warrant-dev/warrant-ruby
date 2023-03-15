@@ -79,18 +79,20 @@ class PermissionTest < Minitest::Test
     end
 
     def test_assign_to_role
-        stub_request(:post, "#{Warrant.config.api_base}/v1/roles/role-1/permissions/edit-store")
-            .to_return(body: '{"permissionId": "edit-store", "name": "Edit Store", "description": null}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "permission", "objectId": "edit-store", "relation": "member", "subject": {"objectType": "role", "objectId": "role-1"}}')
 
         assigned_permission = Warrant::Permission.assign_to_role("role-1", "edit-store")
 
-        assert_equal "edit-store", assigned_permission.permission_id
-        assert_equal "Edit Store", assigned_permission.name
-        assert_nil assigned_permission.description
+        assert_equal "permission", assigned_permission.object_type
+        assert_equal "edit-store", assigned_permission.object_id
+        assert_equal "member", assigned_permission.relation
+        assert_equal "role", assigned_permission.subject.object_type
+        assert_equal "role-1", assigned_permission.subject.object_id
     end
 
     def test_remove_from_role
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/roles/role-1/permissions/edit-store")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Permission.remove_from_role("role-1", "edit-store")
     end
@@ -113,18 +115,20 @@ class PermissionTest < Minitest::Test
     end
 
     def test_assign_to_user
-        stub_request(:post, "#{Warrant.config.api_base}/v1/users/user-1/permissions/edit-store")
-            .to_return(body: '{"permissionId": "edit-store", "name": "Edit Store", "description": null}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "permission", "objectId": "edit-store", "relation": "member", "subject": {"objectType": "user", "objectId": "user-1"}}')
 
         assigned_permission = Warrant::Permission.assign_to_user("user-1", "edit-store")
 
-        assert_equal "edit-store", assigned_permission.permission_id
-        assert_equal "Edit Store", assigned_permission.name
-        assert_nil assigned_permission.description
+        assert_equal "permission", assigned_permission.object_type
+        assert_equal "edit-store", assigned_permission.object_id
+        assert_equal "member", assigned_permission.relation
+        assert_equal "user", assigned_permission.subject.object_type
+        assert_equal "user-1", assigned_permission.subject.object_id
     end
 
     def test_remove_from_user
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/users/user-1/permissions/edit-store")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Permission.remove_from_user("user-1", "edit-store")
     end

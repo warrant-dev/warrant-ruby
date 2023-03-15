@@ -2,6 +2,8 @@
 
 module Warrant
     class PricingTier
+        OBJECT_TYPE = "pricing-tier"
+
         include Warrant::WarrantObject
 
         attr_reader :pricing_tier_id
@@ -135,7 +137,7 @@ module Warrant
         # @param tenant_id [String] The tenant_id of the tenant you want to assign a pricing tier to.
         # @param pricing_tier_id [String] The pricing_tier_id of the pricing tier you want to assign to a tenant.
         #
-        # @return [PricingTier] assigned pricing tier
+        # @return [Warrant] warrant assigning pricing tier to tenant
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -143,15 +145,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, pricing_tier_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/pricing-tiers/#{pricing_tier_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                pricing_tier = JSON.parse(res.body)
-                PricingTier.new(pricing_tier['pricingTierId'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # Remove a pricing tier from a tenant
@@ -167,14 +161,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, pricing_tier_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/pricing-tiers/#{pricing_tier_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # List pricing tiers for user
@@ -205,7 +192,7 @@ module Warrant
         # @param user_id [String] The user_id of the user you want to assign a pricing tier to.
         # @param pricing_tier_id [String] The pricing_tier_id of the pricing tier you want to assign to a user.
         #
-        # @return [PricingTier] assigned pricing tier
+        # @return [Warrant] warrant assigning pricing tier to user
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -213,15 +200,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, pricing_tier_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/pricing-tiers/#{pricing_tier_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                pricing_tier = JSON.parse(res.body)
-                PricingTier.new(pricing_tier['pricingTierId'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a pricing tier from a user
@@ -237,14 +216,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, pricing_tier_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/pricing-tiers/#{pricing_tier_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List features for a pricing tier
