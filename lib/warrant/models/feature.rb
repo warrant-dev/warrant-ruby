@@ -2,6 +2,8 @@
 
 module Warrant
     class Feature
+        OBJECT_TYPE = "feature"
+
         include Warrant::WarrantObject
 
         attr_reader :feature_id
@@ -142,7 +144,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, feature_id)
-            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "tenant", object_id: tenant_id })
+            Warrant.create({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # Remove a feature from a tenant
@@ -158,7 +160,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, feature_id)
-            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "tenant", object_id: tenant_id })
+            Warrant.delete({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # List features for user
@@ -197,7 +199,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, feature_id)
-            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.create({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a feature from a user
@@ -213,7 +215,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, feature_id)
-            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.delete({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List features for pricing tier
@@ -252,7 +254,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_pricing_tier(pricing_tier_id, feature_id)
-            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "pricing-tier", object_id: pricing_tier_id })
+            Warrant.create({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id })
         end
 
         # Remove a feature from a pricing tier
@@ -268,7 +270,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_pricing_tier(pricing_tier_id, feature_id)
-            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "pricing-tier", object_id: pricing_tier_id })
+            Warrant.delete({ object_type: Feature::OBJECT_TYPE, object_id: feature_id }, "member", { object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id })
         end
 
         def warrant_object_type

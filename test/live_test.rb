@@ -378,7 +378,7 @@ class LiveTest < Minitest::Test
 
         Warrant::Feature.remove_from_tenant(paid_tenant.tenant_id, custom_feature.feature_id)
 
-        assert_equal false, Warrant::Warrant.has_feature?(subject: { object_type: "tenant", object_id: paid_tenant.tenant_id }, feature_id: "custom-feature")
+        assert_equal false, Warrant::Warrant.has_feature?(subject: { object_type: Warrant::Tenant::OBJECT_TYPE, object_id: paid_tenant.tenant_id }, feature_id: "custom-feature")
         assert_equal 0, paid_tenant.list_features.length
 
         # Assign feature-1 to free tier to free tenant
@@ -425,7 +425,7 @@ class LiveTest < Minitest::Test
         user = Warrant::User.create
         tenant = Warrant::Tenant.create
 
-        Warrant::Warrant.create({ object_type: "tenant", object_id: tenant.tenant_id }, "admin", { object_type: "user", object_id: user.user_id })
+        Warrant::Warrant.create({ object_type: Warrant::Tenant::OBJECT_TYPE, object_id: tenant.tenant_id }, "admin", { object_type: Warrant::User::OBJECT_TYPE, object_id: user.user_id })
         Warrant::Permission.assign_to_user(user.user_id, "view-self-service-dashboard")
 
         assert Warrant::Session.create_authorization_session(user_id: user.user_id)
@@ -446,7 +446,7 @@ class LiveTest < Minitest::Test
         Warrant::Warrant.create(new_permission, "member", new_user)
 
         assert_equal true, Warrant::Warrant.check(new_permission, "member", new_user)
-        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: "permission", object_id: new_permission.permission_id, relation: "member", subject: { object_type: "user", object_id: new_user.user_id }}])
+        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: Warrant::Permission::OBJECT_TYPE, object_id: new_permission.permission_id, relation: "member", subject: { object_type: Warrant::User::OBJECT_TYPE, object_id: new_user.user_id }}])
 
         # warrant_query = Warrant::WarrantQuery.new
         # warrant_query.select("warrant", "permission").for(subject: "user:#{new_user.user_id}")
@@ -461,7 +461,7 @@ class LiveTest < Minitest::Test
         Warrant::Warrant.create(new_tenant, "member", new_user)
 
         assert_equal true, Warrant::Warrant.check(new_tenant, "member", Warrant::Subject.new("user", new_user.user_id))
-        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: "tenant", object_id: new_tenant.tenant_id, relation: "member", subject: { object_type: "user", object_id: new_user.user_id }}])
+        assert_equal true, Warrant::Warrant.is_authorized?(warrants: [{ object_type: Warrant::Tenant::OBJECT_TYPE, object_id: new_tenant.tenant_id, relation: "member", subject: { object_type: Warrant::User::OBJECT_TYPE, object_id: new_user.user_id }}])
 
         assert_equal true, Warrant::Warrant.check_many("allOf", [{ object: new_permission, relation: "member", subject: new_user }, { object: new_tenant, relation: "member", subject: Warrant::Subject.new("user", new_user.user_id) }])
 

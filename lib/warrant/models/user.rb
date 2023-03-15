@@ -2,6 +2,8 @@
 
 module Warrant
     class User
+        OBJECT_TYPE = "user"
+
         include Warrant::WarrantObject
 
         attr_reader :user_id, :email, :created_at
@@ -358,7 +360,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, user_id)
-            Warrant.create({ object_type: "tenant", object_id: tenant_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.create({ object_type: Tenant::OBJECT_TYPE, object_id: tenant_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a user from a tenant
@@ -373,7 +375,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, user_id)
-            Warrant.delete({ object_type: "tenant", object_id: tenant_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.delete({ object_type: Tenant::OBJECT_TYPE, object_id: tenant_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List all tenants for a user

@@ -2,6 +2,8 @@
 
 module Warrant
     class Permission
+        OBJECT_TYPE = "permission"
+
         include Warrant::WarrantObject
 
         attr_reader :permission_id, :name, :description
@@ -195,7 +197,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_role(role_id, permission_id)
-            Warrant.create({ object_type: "permission", object_id: permission_id }, "member", { object_type: "role", object_id: role_id })
+            Warrant.create({ object_type: Permission::OBJECT_TYPE, object_id: permission_id }, "member", { object_type: Role::OBJECT_TYPE, object_id: role_id })
         end
 
         # Remove a permission from a role
@@ -211,7 +213,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_role(role_id, permission_id)
-            Warrant.delete({ object_type: "permission", object_id: permission_id }, "member", { object_type: "role", object_id: role_id })
+            Warrant.delete({ object_type: Permission::OBJECT_TYPE, object_id: permission_id }, "member", { object_type: Role::OBJECT_TYPE, object_id: role_id })
         end
 
         # List permissions for a user
@@ -251,7 +253,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, permission_id)
-            Warrant.create({ object_type: "permission", object_id: permission_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.create({ object_type: Permission::OBJECT_TYPE, object_id: permission_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a permission from a user
@@ -267,7 +269,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, permission_id)
-            Warrant.delete({ object_type: "permission", object_id: permission_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.delete({ object_type: Permission::OBJECT_TYPE, object_id: permission_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         def warrant_object_type

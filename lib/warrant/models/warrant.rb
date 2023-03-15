@@ -344,11 +344,11 @@ module Warrant
         def self.user_has_permission?(params = {})
             return is_authorized?(
                 warrants: [{
-                    object_type: "permission",
+                    object_type: Permission::OBJECT_TYPE,
                     object_id: params[:permission_id],
                     relation: "member",
                     subject: {
-                        object_type: "user",
+                        object_type: User::OBJECT_TYPE,
                         object_id: params[:user_id]
                     },
                     context: params[:context]
@@ -377,7 +377,7 @@ module Warrant
         def self.has_feature?(params = {})
             return is_authorized?(
                 warrants: [{
-                    object_type: "feature",
+                    object_type: Feature::OBJECT_TYPE,
                     object_id: params[:feature_id],
                     relation: "member",
                     subject: {

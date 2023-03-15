@@ -2,6 +2,8 @@
 
 module Warrant
     class Tenant
+        OBJECT_TYPE = "tenant"
+
         include Warrant::WarrantObject
 
         attr_reader :tenant_id, :name, :created_at

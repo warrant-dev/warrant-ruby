@@ -2,6 +2,8 @@
 
 module Warrant
     class PricingTier
+        OBJECT_TYPE = "pricing-tier"
+
         include Warrant::WarrantObject
 
         attr_reader :pricing_tier_id
@@ -143,7 +145,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, pricing_tier_id)
-            Warrant.create({ object_type: "pricing-tier", object_id: pricing_tier_id }, "member", { object_type: "tenant", object_id: tenant_id })
+            Warrant.create({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # Remove a pricing tier from a tenant
@@ -159,7 +161,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, pricing_tier_id)
-            Warrant.delete({ object_type: "pricing-tier", object_id: pricing_tier_id }, "member", { object_type: "tenant", object_id: tenant_id })
+            Warrant.delete({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: Tenant::OBJECT_TYPE, object_id: tenant_id })
         end
 
         # List pricing tiers for user
@@ -198,7 +200,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, pricing_tier_id)
-            Warrant.create({ object_type: "pricing-tier", object_id: pricing_tier_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.create({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # Remove a pricing tier from a user
@@ -214,7 +216,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, pricing_tier_id)
-            Warrant.delete({ object_type: "pricing-tier", object_id: pricing_tier_id }, "member", { object_type: "user", object_id: user_id })
+            Warrant.delete({ object_type: PricingTier::OBJECT_TYPE, object_id: pricing_tier_id }, "member", { object_type: User::OBJECT_TYPE, object_id: user_id })
         end
 
         # List features for a pricing tier
