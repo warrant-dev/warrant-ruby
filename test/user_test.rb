@@ -5,8 +5,8 @@ require "test_helper"
 class UserTest < Minitest::Test
     def test_create
         stub_request(:post, "#{Warrant.config.api_base}/v1/users")
-        .with(body: "{\"userId\":\"new-user\",\"email\":\"user@test.com\"}")
-        .to_return(body: '{"userId": "new-user", "email": "user@test.com", "createdAt": "2022-12-16"}')
+            .with(body: "{\"userId\":\"new-user\",\"email\":\"user@test.com\"}")
+            .to_return(body: '{"userId": "new-user", "email": "user@test.com", "createdAt": "2022-12-16"}')
 
         created_user = Warrant::User.create(user_id: "new-user", email: "user@test.com")
 
@@ -17,8 +17,8 @@ class UserTest < Minitest::Test
 
     def test_create__raises_error
         stub_request(:post, "#{Warrant.config.api_base}/v1/users")
-        .with(body: "{\"userId\":\"new-user\",\"email\":\"user@test.com\"}")
-        .to_raise(Warrant::DuplicateRecordError)
+            .with(body: "{\"userId\":\"new-user\",\"email\":\"user@test.com\"}")
+            .to_raise(Warrant::DuplicateRecordError)
 
         assert_raises Warrant::DuplicateRecordError do
         Warrant::User.create(user_id: "new-user", email: "user@test.com")
@@ -27,8 +27,8 @@ class UserTest < Minitest::Test
 
     def test_batch_create
         stub_request(:post, "#{Warrant.config.api_base}/v1/users")
-        .with(body: "[{\"userId\":\"batch-user-1\"},{\"userId\":\"batch-user-2\"}]")
-        .to_return(body: '[{"userId": "batch-user-1", "email": null, "createdAt": "2022-12-16"}, {"userId": "batch-user-2", "email": null, "createdAt": "2022-12-16"}]')
+            .with(body: "[{\"userId\":\"batch-user-1\"},{\"userId\":\"batch-user-2\"}]")
+            .to_return(body: '[{"userId": "batch-user-1", "email": null, "createdAt": "2022-12-16"}, {"userId": "batch-user-2", "email": null, "createdAt": "2022-12-16"}]')
 
         created_users = Warrant::User.batch_create([{ user_id: "batch-user-1" }, { user_id: "batch-user-2" }])
 
@@ -45,8 +45,8 @@ class UserTest < Minitest::Test
 
     def test_batch_create__raises_error
         stub_request(:post, "#{Warrant.config.api_base}/v1/users")
-        .with(body: "[{\"userId\":\"batch-user-1\"},{\"userId\":\"batch-user-2\"}]")
-        .to_raise(Warrant::DuplicateRecordError)
+            .with(body: "[{\"userId\":\"batch-user-1\"},{\"userId\":\"batch-user-2\"}]")
+            .to_raise(Warrant::DuplicateRecordError)
 
         assert_raises Warrant::DuplicateRecordError do
         Warrant::User.batch_create([{ user_id: "batch-user-1" }, { user_id: "batch-user-2" }])
@@ -61,7 +61,7 @@ class UserTest < Minitest::Test
 
     def test_delete__raises_error
         stub_request(:delete, "#{Warrant.config.api_base}/v1/users/some-user")
-        .to_raise(Warrant::NotFoundError)
+            .to_raise(Warrant::NotFoundError)
 
         assert_raises Warrant::NotFoundError do
         Warrant::User.delete("some-user")
@@ -70,7 +70,7 @@ class UserTest < Minitest::Test
 
     def test_list
         stub_request(:get, "#{Warrant.config.api_base}/v1/users")
-        .to_return(body: '[{"userId": "user-1", "email": null, "createdAt": "2022-01-01"}, {"userId": "user-2", "email": "user2@test.com", "createdAt": "2022-06-12"}]')
+            .to_return(body: '[{"userId": "user-1", "email": null, "createdAt": "2022-01-01"}, {"userId": "user-2", "email": "user2@test.com", "createdAt": "2022-06-12"}]')
 
         users = Warrant::User.list
 
@@ -87,7 +87,7 @@ class UserTest < Minitest::Test
 
     def test_list__raises_error
         stub_request(:get, "#{Warrant.config.api_base}/v1/users")
-        .to_raise(Warrant::InternalError)
+            .to_raise(Warrant::InternalError)
 
         assert_raises Warrant::InternalError do
         Warrant::User.list
@@ -96,7 +96,7 @@ class UserTest < Minitest::Test
 
     def test_get
         stub_request(:get, "#{Warrant.config.api_base}/v1/users/some-user")
-        .to_return(body: '{"userId": "some-user", "email": "user@test.com", "createdAt": "2022-12-16"}')
+            .to_return(body: '{"userId": "some-user", "email": "user@test.com", "createdAt": "2022-12-16"}')
 
         user = Warrant::User.get("some-user")
 
@@ -107,7 +107,7 @@ class UserTest < Minitest::Test
 
     def test_get__raises_error
         stub_request(:get, "#{Warrant.config.api_base}/v1/users/some-user")
-        .to_raise(Warrant::NotFoundError)
+            .to_raise(Warrant::NotFoundError)
 
         assert_raises Warrant::NotFoundError do
         Warrant::User.get("some-user")
@@ -116,8 +116,8 @@ class UserTest < Minitest::Test
 
     def test_update
         stub_request(:put, "#{Warrant.config.api_base}/v1/users/some-user")
-        .with(body: "{\"email\":\"updated-email@test.com\"}")
-        .to_return(body: '{"userId": "some-user", "email": "updated-email@test.com", "createdAt": "2022-12-16"}')
+            .with(body: "{\"email\":\"updated-email@test.com\"}")
+            .to_return(body: '{"userId": "some-user", "email": "updated-email@test.com", "createdAt": "2022-12-16"}')
 
         user = Warrant::User.update("some-user", { email: "updated-email@test.com" })
 
@@ -128,8 +128,8 @@ class UserTest < Minitest::Test
 
     def test_update__raises_error
         stub_request(:put, "#{Warrant.config.api_base}/v1/users/some-user")
-        .with(body: "{\"email\":\"updated-email@test.com\"}")
-        .to_raise(Warrant::NotFoundError)
+            .with(body: "{\"email\":\"updated-email@test.com\"}")
+            .to_raise(Warrant::NotFoundError)
 
         assert_raises Warrant::NotFoundError do
         Warrant::User.update("some-user", { email: "updated-email@test.com" })
@@ -138,7 +138,7 @@ class UserTest < Minitest::Test
 
     def test_list_for_tenant
         stub_request(:get, "#{Warrant.config.api_base}/v1/tenants/my-store/users")
-        .to_return(body: '[{"userId": "user-1", "email": null, "createdAt": "2022-01-01"}, {"userId": "user-2", "email": "user2@test.com", "createdAt": "2022-06-12"}]')
+            .to_return(body: '[{"userId": "user-1", "email": null, "createdAt": "2022-01-01"}, {"userId": "user-2", "email": "user2@test.com", "createdAt": "2022-06-12"}]')
 
         users = Warrant::User.list_for_tenant("my-store")
 
@@ -155,16 +155,16 @@ class UserTest < Minitest::Test
 
     def test_list_for_tenant__raises_error
         stub_request(:get, "#{Warrant.config.api_base}/v1/tenants/my-store/users")
-        .to_raise(Warrant::UnauthorizedError)
+            .to_raise(Warrant::UnauthorizedError)
 
         assert_raises Warrant::UnauthorizedError do
         Warrant::User.list_for_tenant("my-store")
         end
     end
 
-    def test_add_to_tenant
-        stub_request(:post, "#{Warrant.config.api_base}/v1/tenants/my-store/users/new-employee")
-        .to_return(body: '{"objectType": "tenant", "objectId": "my-store", "relation": "member", "subject": { "objectType": "user", "objectId": "new-employee" }}')
+    def test_assign_to_tenant
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "tenant", "objectId": "my-store", "relation": "member", "subject": { "objectType": "user", "objectId": "new-employee" }}')
 
         warrant = Warrant::User.assign_to_tenant("my-store", "new-employee")
 
@@ -175,9 +175,9 @@ class UserTest < Minitest::Test
         assert_equal "new-employee", warrant.subject.object_id
     end
 
-    def test_add_to_tenant__raises_error
-        stub_request(:post, "#{Warrant.config.api_base}/v1/tenants/my-store/users/new-employee")
-        .to_raise(Warrant::InternalError)
+    def test_assign_to_tenant__raises_error
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_raise(Warrant::InternalError)
 
         assert_raises Warrant::InternalError do
         Warrant::User.assign_to_tenant("my-store", "new-employee")
@@ -185,7 +185,7 @@ class UserTest < Minitest::Test
     end
 
     def test_remove_from_tenant
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/tenants/my-store/users/new-employee")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::User.remove_from_tenant("my-store", "new-employee")
     end

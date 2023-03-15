@@ -134,7 +134,7 @@ module Warrant
         # @param tenant_id [String] The tenant_id of the tenant you want to assign a feature to.
         # @param feature_id [String] The feature_id of the feature you want to assign to a tenant.
         #
-        # @return [Feature] assigned feature
+        # @return [Warrant] warrant assigning feature to tenant
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -142,15 +142,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_tenant(tenant_id, feature_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                feature = JSON.parse(res.body)
-                Feature.new(feature['featureId'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "tenant", object_id: tenant_id })
         end
 
         # Remove a feature from a tenant
@@ -166,14 +158,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_tenant(tenant_id, feature_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/tenants/#{tenant_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "tenant", object_id: tenant_id })
         end
 
         # List features for user
@@ -204,7 +189,7 @@ module Warrant
         # @param user_id [String] The user_id of the user you want to assign a feature to.
         # @param feature_id [String] The feature_id of the feature you want to assign to a user.
         #
-        # @return [Feature] assigned feature
+        # @return [Warrant] warrant assigning feature to user
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -212,15 +197,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, feature_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                feature = JSON.parse(res.body)
-                Feature.new(feature['featureId'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "user", object_id: user_id })
         end
 
         # Remove a feature from a user
@@ -236,14 +213,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, feature_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "user", object_id: user_id })
         end
 
         # List features for pricing tier
@@ -274,7 +244,7 @@ module Warrant
         # @param pricing_tier_id [String] The pricing_tier_id of the pricing tier you want to assign a feature to.
         # @param feature_id [String] The feature_id of the feature you want to assign to a pricing tier.
         #
-        # @return [Feature] assigned pricing tier
+        # @return [Warrant] warrant assigning feature to pricing tier
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -282,15 +252,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_pricing_tier(pricing_tier_id, feature_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers/#{pricing_tier_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                feature = JSON.parse(res.body)
-                Feature.new(feature['featureId'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: "feature", object_id: feature_id }, "member", { object_type: "pricing-tier", object_id: pricing_tier_id })
         end
 
         # Remove a feature from a pricing tier
@@ -306,14 +268,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_pricing_tier(pricing_tier_id, feature_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/pricing-tiers/#{pricing_tier_id}/features/#{feature_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: "feature", object_id: feature_id }, "member", { object_type: "pricing-tier", object_id: pricing_tier_id })
         end
 
         def warrant_object_type

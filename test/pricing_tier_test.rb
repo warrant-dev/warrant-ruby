@@ -51,16 +51,20 @@ class PricingTierTest < Minitest::Test
     end
 
     def test_assign_to_tenant
-        stub_request(:post, "#{Warrant.config.api_base}/v1/tenants/tenant-1/pricing-tiers/enterprise")
-            .to_return(body: '{"pricingTierId": "enterprise"}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "pricing-tier", "objectId": "enterprise", "relation": "member", "subject": {"objectType": "tenant", "objectId": "tenant-1"}}')
 
         assigned_pricing_tier = Warrant::PricingTier.assign_to_tenant("tenant-1", "enterprise")
 
-        assert_equal "enterprise", assigned_pricing_tier.pricing_tier_id
+        assert_equal "pricing-tier", assigned_pricing_tier.object_type
+        assert_equal "enterprise", assigned_pricing_tier.object_id
+        assert_equal "member", assigned_pricing_tier.relation
+        assert_equal "tenant", assigned_pricing_tier.subject.object_type
+        assert_equal "tenant-1", assigned_pricing_tier.subject.object_id
     end
 
     def test_remove_from_tenant
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/tenants/tenant-1/pricing-tiers/enterprise")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::PricingTier.remove_from_tenant("tenant-1", "enterprise")
     end
@@ -77,16 +81,20 @@ class PricingTierTest < Minitest::Test
     end
 
     def test_assign_to_user
-        stub_request(:post, "#{Warrant.config.api_base}/v1/users/user-1/pricing-tiers/basic")
-            .to_return(body: '{"pricingTierId": "basic"}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "pricing-tier", "objectId": "basic", "relation": "member", "subject": {"objectType": "user", "objectId": "user-1"}}')
 
         assigned_pricing_tier = Warrant::PricingTier.assign_to_user("user-1", "basic")
 
-        assert_equal "basic", assigned_pricing_tier.pricing_tier_id
+        assert_equal "pricing-tier", assigned_pricing_tier.object_type
+        assert_equal "basic", assigned_pricing_tier.object_id
+        assert_equal "member", assigned_pricing_tier.relation
+        assert_equal "user", assigned_pricing_tier.subject.object_type
+        assert_equal "user-1", assigned_pricing_tier.subject.object_id
     end
 
     def test_remove_from_user
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/users/user-1/pricing-tiers/basic")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::PricingTier.remove_from_user("user-1", "basic")
     end

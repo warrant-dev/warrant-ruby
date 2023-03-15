@@ -79,18 +79,20 @@ class RoleTest < Minitest::Test
     end
 
     def test_assign_to_user
-        stub_request(:post, "#{Warrant.config.api_base}/v1/users/user-1/roles/admin")
-            .to_return(body: '{"roleId": "admin", "name": "Admin", "description": null}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "role", "objectId": "admin", "relation": "member", "subject": {"objectType": "user", "objectId": "user-1"}}')
 
         assigned_role = Warrant::Role.assign_to_user("user-1", "admin")
 
-        assert_equal "admin", assigned_role.role_id
-        assert_equal "Admin", assigned_role.name
-        assert_nil assigned_role.description
+        assert_equal "role", assigned_role.object_type
+        assert_equal "admin", assigned_role.object_id
+        assert_equal "member", assigned_role.relation
+        assert_equal "user", assigned_role.subject.object_type
+        assert_equal "user-1", assigned_role.subject.object_id
     end
 
     def test_remove_from_user
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/users/user-1/roles/admin")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Role.remove_from_user("user-1", "admin")
     end

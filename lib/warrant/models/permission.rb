@@ -186,7 +186,7 @@ module Warrant
         # @param role_id [String] The role_id of the role you want to assign a permission to.
         # @param permission_id [String] The permission_id of the permission you want to assign to a role.
         #
-        # @return [Permission] assigned permission
+        # @return [Warrant] warrant assigning permission to role
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -195,15 +195,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_role(role_id, permission_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                permission = JSON.parse(res.body)
-                Permission.new(permission['permissionId'], permission['name'], permission['description'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: "permission", object_id: permission_id }, "member", { object_type: "role", object_id: role_id })
         end
 
         # Remove a permission from a role
@@ -219,14 +211,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_role(role_id, permission_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/roles/#{role_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: "permission", object_id: permission_id }, "member", { object_type: "role", object_id: role_id })
         end
 
         # List permissions for a user
@@ -257,7 +242,7 @@ module Warrant
         # @param user_id [String] The user_id of the user you want to assign a permission to.
         # @param permission_id [String] The permission_id of the permission you want to assign to a user.
         #
-        # @return [Permission] assigned permission
+        # @return [Warrant] warrant assigning permission to user
         #
         # @raise [Warrant::DuplicateRecordError]
         # @raise [Warrant::InternalError]
@@ -266,15 +251,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.assign_to_user(user_id, permission_id)
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                permission = JSON.parse(res.body)
-                Permission.new(permission['permissionId'], permission['name'], permission['description'])
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.create({ object_type: "permission", object_id: permission_id }, "member", { object_type: "user", object_id: user_id })
         end
 
         # Remove a permission from a user
@@ -290,14 +267,7 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
         def self.remove_from_user(user_id, permission_id)
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/users/#{user_id}/permissions/#{permission_id}"))
-
-            case res
-            when Net::HTTPSuccess
-                return
-            else
-                APIOperations.raise_error(res)
-            end
+            Warrant.delete({ object_type: "permission", object_id: permission_id }, "member", { object_type: "user", object_id: user_id })
         end
 
         def warrant_object_type

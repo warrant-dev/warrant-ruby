@@ -51,16 +51,20 @@ class FeatureTest < Minitest::Test
     end
 
     def test_assign_to_tenant
-        stub_request(:post, "#{Warrant.config.api_base}/v1/tenants/tenant-1/features/feature-1")
-            .to_return(body: '{"featureId": "feature-1"}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "feature", "objectId": "feature-1", "relation": "member", "subject": {"objectType": "tenant", "objectId": "tenant-1"}}')
 
         assigned_feature = Warrant::Feature.assign_to_tenant("tenant-1", "feature-1")
 
-        assert_equal "feature-1", assigned_feature.feature_id
+        assert_equal "feature", assigned_feature.object_type
+        assert_equal "feature-1", assigned_feature.object_id
+        assert_equal "member", assigned_feature.relation
+        assert_equal "tenant", assigned_feature.subject.object_type
+        assert_equal "tenant-1", assigned_feature.subject.object_id
     end
 
     def test_remove_from_tenant
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/tenants/tenant-1/features/feature-1")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Feature.remove_from_tenant("tenant-1", "feature-1")
     end
@@ -77,16 +81,20 @@ class FeatureTest < Minitest::Test
     end
 
     def test_assign_to_user
-        stub_request(:post, "#{Warrant.config.api_base}/v1/users/user-1/features/feature-1")
-            .to_return(body: '{"featureId": "feature-1"}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "feature", "objectId": "feature-1", "relation": "member", "subject": {"objectType": "user", "objectId": "user-1"}}')
 
         assigned_feature = Warrant::Feature.assign_to_user("user-1", "feature-1")
 
-        assert_equal "feature-1", assigned_feature.feature_id
+        assert_equal "feature", assigned_feature.object_type
+        assert_equal "feature-1", assigned_feature.object_id
+        assert_equal "member", assigned_feature.relation
+        assert_equal "user", assigned_feature.subject.object_type
+        assert_equal "user-1", assigned_feature.subject.object_id
     end
 
     def test_remove_from_user
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/users/user-1/features/some-feature")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Feature.remove_from_user("user-1", "some-feature")
     end
@@ -103,16 +111,20 @@ class FeatureTest < Minitest::Test
     end
 
     def test_assign_to_pricing_tier
-        stub_request(:post, "#{Warrant.config.api_base}/v1/pricing-tiers/enterprise/features/feature-1")
-            .to_return(body: '{"featureId": "feature-1"}')
+        stub_request(:post, "#{Warrant.config.api_base}/v1/warrants")
+            .to_return(body: '{"objectType": "feature", "objectId": "feature-1", "relation": "member", "subject": {"objectType": "pricing-tier", "objectId": "enterprise"}}')
 
         assigned_feature = Warrant::Feature.assign_to_pricing_tier("enterprise", "feature-1")
 
-        assert_equal "feature-1", assigned_feature.feature_id
+        assert_equal "feature", assigned_feature.object_type
+        assert_equal "feature-1", assigned_feature.object_id
+        assert_equal "member", assigned_feature.relation
+        assert_equal "pricing-tier", assigned_feature.subject.object_type
+        assert_equal "enterprise", assigned_feature.subject.object_id
     end
 
     def test_remove_from_pricing_tier
-        stub_request(:delete, "#{Warrant.config.api_base}/v1/pricing-tiers/enterprise/features/some-feature")
+        stub_request(:delete, "#{Warrant.config.api_base}/v1/warrants")
 
         assert_nil Warrant::Feature.remove_from_pricing_tier("enterprise", "some-feature")
     end
