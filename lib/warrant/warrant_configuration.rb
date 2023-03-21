@@ -8,6 +8,7 @@ module Warrant
         attr_reader :self_service_dash_url_base
 
         def initialize
+            @api_key = ""
             @api_base = "https://api.warrant.dev"
             @authorize_endpoint = "https://api.warrant.dev"
             @self_service_dash_url_base = "https://self-serve.warrant.dev"

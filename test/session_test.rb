@@ -3,6 +3,10 @@
 require "test_helper"
 
 class SessionTest < Minitest::Test
+    def setup
+        Warrant.config.use_ssl = false
+    end
+
     def test_create_authorization_session
         stub_request(:post, "#{Warrant.config.api_base}/v1/sessions")
             .with(body: "{\"userId\":\"10\",\"type\":\"sess\"}")
