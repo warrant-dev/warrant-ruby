@@ -44,11 +44,27 @@ You can also build the gem from source:
 require 'warrant'
 Warrant.api_key = 'api_test_f5dsKVeYnVSLHGje44zAygqgqXiLJBICbFzCiAg1E='
 
-# create a user
+# Create a user
 Warrant::User.create(user_id: "user123")
 
-# check whether user slp951 has view access to report 7asm24
+# Check whether user slp951 has view access to report 7asm24
 Warrant::Warrant.is_authorized?(object_type: "report", object_id: "7asm24", relation: "viewer", subject: { object_id: "user", object_id: "slp951" })
+```
+
+## Use with Warrant OSS
+---
+```ruby
+require 'warrant'
+
+# Set api base and authorize endpoint
+Warrant.api_base = 'http://localhost:8000'
+Warrant.authorize_endpoint = 'http://localhost:8000'
+
+# Disable ssl if running locally
+Warrant.use_ssl = false
+
+# Create user
+Warrant::User.create(user_id: "user123")
 ```
 
 
