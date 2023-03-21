@@ -4,7 +4,7 @@ require "test_helper"
 
 class RoleTest < Minitest::Test
     def setup
-        Warrant.config.use_ssl = false
+        Warrant.config.use_ssl = true
     end
 
     def test_create
