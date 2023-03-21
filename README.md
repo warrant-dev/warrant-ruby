@@ -51,20 +51,27 @@ Warrant::User.create(user_id: "user123")
 Warrant::Warrant.is_authorized?(object_type: "report", object_id: "7asm24", relation: "viewer", subject: { object_id: "user", object_id: "slp951" })
 ```
 
-## Use with Warrant OSS
+## Configuring the API and Authorize Endpoints
 ---
+The API and Authorize endpoints the SDK makes requests to is configurable via the `Warrant.api_base` and `Warrant.authorize_endpoint` attributes:
+
 ```ruby
 require 'warrant'
 
-# Set api base and authorize endpoint
+# Set api and authorize endpoints to http://localhost:8000
 Warrant.api_base = 'http://localhost:8000'
 Warrant.authorize_endpoint = 'http://localhost:8000'
+```
 
-# Disable ssl if running locally
+## Configuring SSL
+---
+By default, the SDK will attempt to use SSL when making requests to the API. This setting is configurable via the `Warrant.use_ssl` attribute:
+
+```ruby
+require 'warrant'
+
+# Disable ssl
 Warrant.use_ssl = false
-
-# Create user
-Warrant::User.create(user_id: "user123")
 ```
 
 
