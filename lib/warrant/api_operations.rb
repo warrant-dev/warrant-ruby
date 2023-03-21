@@ -8,9 +8,9 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
+                headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
                 http.post(uri.path, params.to_json, headers)
             end
 
@@ -18,7 +18,7 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 request = Net::HTTP::Delete.new(uri.path)
-                request["Authorization"] = "ApiKey #{::Warrant.config.api_key}"
+                request["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
                 request["User-Agent"] = "warrant-ruby/#{VERSION}"
 
                 http.request(request, params.to_json)
@@ -28,9 +28,9 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
+                headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
 
                 unless params.empty?
                     normalized_params = Util.normalize_params(params.compact)
@@ -44,9 +44,9 @@ module Warrant
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
-                    "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
+                headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
                 http.put(uri.path, params.to_json, headers)
             end
 
