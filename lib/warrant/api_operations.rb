@@ -4,9 +4,9 @@ module Warrant
     # @!visibility private
     class APIOperations
         class << self
-            def post(uri, params = {}, use_ssl = true)
+            def post(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
-                http.use_ssl = use_ssl
+                http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
@@ -16,7 +16,7 @@ module Warrant
 
             def delete(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
-                http.use_ssl = true
+                http.use_ssl = ::Warrant.config.use_ssl
                 request = Net::HTTP::Delete.new(uri.path)
                 request["Authorization"] = "ApiKey #{::Warrant.config.api_key}"
                 request["User-Agent"] = "warrant-ruby/#{VERSION}"
@@ -26,7 +26,7 @@ module Warrant
 
             def get(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
-                http.use_ssl = true
+                http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
@@ -42,7 +42,7 @@ module Warrant
 
             def put(uri, params = {})
                 http = Net::HTTP.new(uri.host, uri.port)
-                http.use_ssl = true
+                http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "Authorization": "ApiKey #{::Warrant.config.api_key}",
                     "User-Agent": "warrant-ruby/#{VERSION}"
