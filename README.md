@@ -6,7 +6,6 @@ Use [Warrant](https://warrant.dev/) in ruby projects.
 [![Slack](https://img.shields.io/badge/slack-join-brightgreen)](https://join.slack.com/t/warrantcommunity/shared_invite/zt-12g84updv-5l1pktJf2bI5WIKN4_~f4w)
 
 ## Installation
----
 
 Add this line to your application's Gemfile:
 
@@ -27,18 +26,15 @@ You can also build the gem from source:
     $ gem build warrant.gemspec
 
 ## Documentation
----
 
 - [Ruby API Docs](https://rubydoc.info/gems/warrant)
 - [Warrant Docs](https://docs.warrant.dev/)
 
 ## Requirements
----
 
 - Ruby 2.3+.
 
 ## Usage
----
 
 ```ruby
 require 'warrant'
@@ -52,7 +48,6 @@ Warrant::Warrant.is_authorized?(object_type: "report", object_id: "7asm24", rela
 ```
 
 ## Configuring the API and Authorize Endpoints
----
 The API and Authorize endpoints the SDK makes requests to is configurable via the `Warrant.api_base` and `Warrant.authorize_endpoint` attributes:
 
 ```ruby
@@ -64,7 +59,6 @@ Warrant.authorize_endpoint = 'http://localhost:8000'
 ```
 
 ## Configuring SSL
----
 By default, the SDK will attempt to use SSL when making requests to the API. This setting is configurable via the `Warrant.use_ssl` attribute:
 
 ```ruby
@@ -73,7 +67,6 @@ require 'warrant'
 # Disable ssl
 Warrant.use_ssl = false
 ```
-
 
 We’ve used a random API key in these code examples. Replace it with your [actual publishable API keys](https://app.warrant.dev) to
 test this code through your own Warrant account.
