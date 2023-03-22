@@ -4,8 +4,10 @@ require "test_helper"
 
 class LiveTest < Minitest::Test
     def setup
-        # Remove skip() call and add your API_KEY to run tests against the live server
+        # Comment out skip() call and add your API_KEY to run tests against the live server
         skip()
+        # Uncomment if the endpoint you're testing against is not behind SSL
+        # Warrant.use_ssl = false
         Warrant.api_key = "YOUR_KEY"
         WebMock.allow_net_connect!
     end

@@ -413,7 +413,7 @@ module Warrant
 
         def self.edge_authorize?(params = {})
             request_url = URI.parse("#{::Warrant.config.authorize_endpoint}/v2/authorize")
-            res = APIOperations.post(request_url, Util.normalize_params(params), request_url.scheme === "https")
+            res = APIOperations.post(request_url, Util.normalize_params(params))
             res_json = JSON.parse(res.body)
 
             case res

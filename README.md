@@ -44,11 +44,34 @@ You can also build the gem from source:
 require 'warrant'
 Warrant.api_key = 'api_test_f5dsKVeYnVSLHGje44zAygqgqXiLJBICbFzCiAg1E='
 
-# create a user
+# Create a user
 Warrant::User.create(user_id: "user123")
 
-# check whether user slp951 has view access to report 7asm24
+# Check whether user slp951 has view access to report 7asm24
 Warrant::Warrant.is_authorized?(object_type: "report", object_id: "7asm24", relation: "viewer", subject: { object_id: "user", object_id: "slp951" })
+```
+
+## Configuring the API and Authorize Endpoints
+---
+The API and Authorize endpoints the SDK makes requests to is configurable via the `Warrant.api_base` and `Warrant.authorize_endpoint` attributes:
+
+```ruby
+require 'warrant'
+
+# Set api and authorize endpoints to http://localhost:8000
+Warrant.api_base = 'http://localhost:8000'
+Warrant.authorize_endpoint = 'http://localhost:8000'
+```
+
+## Configuring SSL
+---
+By default, the SDK will attempt to use SSL when making requests to the API. This setting is configurable via the `Warrant.use_ssl` attribute:
+
+```ruby
+require 'warrant'
+
+# Disable ssl
+Warrant.use_ssl = false
 ```
 
 

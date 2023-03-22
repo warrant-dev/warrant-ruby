@@ -3,6 +3,10 @@
 require "test_helper"
 
 class FeatureTest < Minitest::Test
+    def setup
+        Warrant.config.use_ssl = true
+    end
+
     def test_create
         stub_request(:post, "#{Warrant.config.api_base}/v1/features")
             .with(body: "{\"featureId\":\"feature-1\"}")
