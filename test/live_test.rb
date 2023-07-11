@@ -26,12 +26,12 @@ class LiveTest < Minitest::Test
         assert_equal "my-ruby-user-1", updated_user.user_id
         assert_equal "updated@email.com", updated_user.email
 
-        users = Warrant::User.list(limit: 10, page: 1)
+        users = Warrant::User.list(limit: 10)
         assert_equal 2, users.length
 
         Warrant::User.delete(user1.user_id)
         Warrant::User.delete(user2.user_id)
-        users = Warrant::User.list(limit: 10, page: 1)
+        users = Warrant::User.list(limit: 10)
         assert_equal 0, users.length
     end
 
@@ -49,17 +49,17 @@ class LiveTest < Minitest::Test
         assert_equal "my-ruby-tenant-1", updated_tenant.tenant_id
         assert_equal "Updated Tenant", updated_tenant.name
 
-        tenants = Warrant::Tenant.list(limit: 10, page: 1)
+        tenants = Warrant::Tenant.list(limit: 10)
         assert_equal 2, tenants.length
 
         Warrant::Tenant.delete(tenant1.tenant_id)
         Warrant::Tenant.delete(tenant2.tenant_id)
-        tenants = Warrant::Tenant.list(limit: 10, page: 1)
+        tenants = Warrant::Tenant.list(limit: 10)
         assert_equal 0, tenants.length
     end
 
     def test_crud_roles
-        current_roles = Warrant::Role.list(limit: 10, page: 1)
+        current_roles = Warrant::Role.list(limit: 10)
 
         role1 = Warrant::Role.create(role_id: "some-role")
         assert_equal "some-role", role1.role_id
@@ -77,17 +77,17 @@ class LiveTest < Minitest::Test
         assert_equal "New Admin", updated_role.name
         assert_equal "updated admin description", updated_role.description
 
-        roles = Warrant::Role.list(limit: 10, page: 1)
+        roles = Warrant::Role.list(limit: 10)
         assert_equal 2, roles.length
 
         Warrant::Role.delete(role1.role_id)
         Warrant::Role.delete(role2.role_id)
-        roles = Warrant::Role.list(limit: 10, page: 1)
+        roles = Warrant::Role.list(limit: 10)
         assert_equal 0, roles.length
     end
 
     def test_crud_permissions
-        current_permissions = Warrant::Permission.list(limit: 10, page: 1)
+        current_permissions = Warrant::Permission.list(limit: 10)
 
         permission1 = Warrant::Permission.create(permission_id: "permission-1")
         assert_equal "permission-1", permission1.permission_id
@@ -105,12 +105,12 @@ class LiveTest < Minitest::Test
         assert_equal "Updated Permission", updated_permission.name
         assert_equal "updated permission description", updated_permission.description
 
-        permissions = Warrant::Permission.list(limit: 10, page: 1)
+        permissions = Warrant::Permission.list(limit: 10)
         assert_equal current_permissions.length + 2, permissions.length
 
         Warrant::Permission.delete(permission1.permission_id)
         Warrant::Permission.delete(permission2.permission_id)
-        permissions = Warrant::Permission.list(limit: 10, page: 1)
+        permissions = Warrant::Permission.list(limit: 10)
         assert_equal current_permissions.length, permissions.length
     end
 
@@ -122,12 +122,12 @@ class LiveTest < Minitest::Test
         fetched_pricing_tier = Warrant::PricingTier.get(pricing_tier2.pricing_tier_id)
         assert_equal "basic", fetched_pricing_tier.pricing_tier_id
 
-        pricing_tiers = Warrant::PricingTier.list(limit: 10, page: 1)
+        pricing_tiers = Warrant::PricingTier.list(limit: 10)
         assert_equal 2, pricing_tiers.length
 
         Warrant::PricingTier.delete(pricing_tier1.pricing_tier_id)
         Warrant::PricingTier.delete(pricing_tier2.pricing_tier_id)
-        pricing_tiers = Warrant::PricingTier.list(limit: 10, page: 1)
+        pricing_tiers = Warrant::PricingTier.list(limit: 10)
         assert_equal 0, pricing_tiers.length
     end
 
@@ -139,12 +139,12 @@ class LiveTest < Minitest::Test
         fetched_feature = Warrant::Feature.get(feature2.feature_id)
         assert_equal "some-feature", fetched_feature.feature_id
 
-        features = Warrant::Feature.list(limit: 10, page: 1)
+        features = Warrant::Feature.list(limit: 10)
         assert_equal 2, features.length
 
         Warrant::Feature.delete(feature1.feature_id)
         Warrant::Feature.delete(feature2.feature_id)
-        features = Warrant::Feature.list(limit: 10, page: 1)
+        features = Warrant::Feature.list(limit: 10)
         assert_equal 0, features.length
     end
 
@@ -234,12 +234,12 @@ class LiveTest < Minitest::Test
         admin_role.assign_permission(create_permission.permission_id)
         admin_user.assign_role(admin_role.role_id)
 
-        admin_role_permissions = admin_role.list_permissions(page: 1, limit: 100)
+        admin_role_permissions = admin_role.list_permissions(limit: 100)
         assert_equal 1, admin_role_permissions.length
         assert_equal "create-report", admin_role_permissions[0].permission_id
         assert_equal true, admin_user.has_permission?("create-report")
 
-        admin_user_roles = admin_user.list_roles(page: 1, limit: 100)
+        admin_user_roles = admin_user.list_roles(limit: 100)
         assert_equal 1, admin_user_roles.length
         assert_equal "administrator", admin_user_roles[0].role_id
 
@@ -260,7 +260,7 @@ class LiveTest < Minitest::Test
 
         assert_equal true, Warrant::Warrant.user_has_permission?(user_id: viewer_user.user_id, permission_id: view_permission.permission_id)
 
-        viewer_user_permissions = Warrant::Permission.list_for_user(viewer_user.user_id, page: 1, limit: 100)
+        viewer_user_permissions = Warrant::Permission.list_for_user(viewer_user.user_id, limit: 100)
 
         assert_equal 1, viewer_user_permissions.length
         assert_equal "view-report", viewer_user_permissions[0].permission_id
@@ -294,13 +294,13 @@ class LiveTest < Minitest::Test
 
         # Assign custom-feature to paid user
         assert_equal false, paid_user.has_feature?("custom-feature")
-        assert_equal 0, paid_user.list_features(page: 1, limit: 100).length
+        assert_equal 0, paid_user.list_features(limit: 100).length
 
         paid_user.assign_feature(custom_feature.feature_id)
 
         assert_equal true, paid_user.has_feature?("custom-feature")
 
-        paid_user_features = Warrant::Feature.list_for_user(paid_user.user_id, page: 1, limit: 100)
+        paid_user_features = Warrant::Feature.list_for_user(paid_user.user_id, limit: 100)
 
         assert_equal 1, paid_user_features.length
         assert_equal "custom-feature", paid_user_features[0].feature_id
@@ -312,8 +312,8 @@ class LiveTest < Minitest::Test
 
         # Assign feature-1 to free tier to free user
         assert_equal false, free_user.has_feature?("feature-1")
-        assert_equal 0, Warrant::Feature.list_for_pricing_tier(free_tier.pricing_tier_id, page: 1, limit: 100).length
-        assert_equal 0, Warrant::PricingTier.list_for_user(free_user.user_id, page: 1, limit: 100).length
+        assert_equal 0, Warrant::Feature.list_for_pricing_tier(free_tier.pricing_tier_id, limit: 100).length
+        assert_equal 0, Warrant::PricingTier.list_for_user(free_user.user_id, limit: 100).length
 
         Warrant::Feature.assign_to_pricing_tier(free_tier.pricing_tier_id, feature1.feature_id)
         Warrant::PricingTier.assign_to_user(free_user.user_id, free_tier.pricing_tier_id)
@@ -385,20 +385,20 @@ class LiveTest < Minitest::Test
 
         # Assign feature-1 to free tier to free tenant
         assert_equal false, free_tenant.has_feature?("feature-1")
-        assert_equal 0, free_tier.list_features(page: 1, limit: 100).length
-        assert_equal 0, free_tenant.list_pricing_tiers(page: 1, limit: 100).length
+        assert_equal 0, free_tier.list_features(limit: 100).length
+        assert_equal 0, free_tenant.list_pricing_tiers(limit: 100).length
 
         free_tier.assign_feature(feature1.feature_id)
         free_tenant.assign_pricing_tier(free_tier.pricing_tier_id)
 
         assert_equal true, free_tenant.has_feature?("feature-1")
 
-        free_tier_features = Warrant::Feature.list_for_pricing_tier(free_tier.pricing_tier_id, page: 1, limit: 100)
+        free_tier_features = Warrant::Feature.list_for_pricing_tier(free_tier.pricing_tier_id, limit: 100)
 
         assert_equal 1, free_tier_features.length
         assert_equal "feature-1", free_tier_features[0].feature_id
 
-        free_tenant_tiers = Warrant::PricingTier.list_for_tenant(free_tenant.tenant_id, page: 1, limit: 100)
+        free_tenant_tiers = Warrant::PricingTier.list_for_tenant(free_tenant.tenant_id, limit: 100)
 
         assert_equal 1, free_tenant_tiers.length
         assert_equal "free", free_tenant_tiers[0].pricing_tier_id
@@ -406,12 +406,12 @@ class LiveTest < Minitest::Test
         free_tier.remove_feature(feature1.feature_id)
 
         assert_equal false, free_tenant.has_feature?("feature-1")
-        assert_equal 0, free_tier.list_features(page: 1, limit: 100).length
-        assert_equal 1, free_tenant.list_pricing_tiers(page: 1, limit: 100).length
+        assert_equal 0, free_tier.list_features(limit: 100).length
+        assert_equal 1, free_tenant.list_pricing_tiers(limit: 100).length
 
         free_tenant.remove_pricing_tier(free_tier.pricing_tier_id)
 
-        assert_equal 0, free_tenant.list_pricing_tiers(page: 1, limit: 100).length
+        assert_equal 0, free_tenant.list_pricing_tiers(limit: 100).length
 
         # Clean up
         Warrant::Tenant.delete(free_tenant.tenant_id)
@@ -452,7 +452,7 @@ class LiveTest < Minitest::Test
 
         # warrant_query = Warrant::WarrantQuery.new
         # warrant_query.select("warrant", "permission").for(subject: "user:#{new_user.user_id}")
-        # query_warrants = Warrant::Warrant.query(warrant_query, page: 1, limit: 100)
+        # query_warrants = Warrant::Warrant.query(warrant_query, limit: 100)
 
         # assert_equal 1, query_warrants['result'].length
         # assert_equal "permission", query_warrants['result'][0].object_type

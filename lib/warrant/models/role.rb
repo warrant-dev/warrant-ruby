@@ -68,6 +68,12 @@ module Warrant
         #
         # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
         # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
+        # @option filters [String] :beforeId A string representing a cursor value in the form of a roleId. If provided, the results returned are immediately before the provided value. (optional)
+        # @option filters [String] :beforeValue A string representing a cursor value in the form of the `sortBy` value. If provided, the results returned are immediately before the provided value. (optional)
+        # @option filters [String] :afterId A string representing a cursor value in the form of a roleId. If provided, the results returned are immediately after the provided value. (optional)
+        # @option filters [String] :afterValue A string representing a cursor value in the form of the `sortBy` value. If provided, the results returned are immediately after the provided value. (optional)
+        # @option filters [String] :sortBy A string representing the field to sort results by. Default value is roleId. (optional)
+        # @option filters [String] :sortOrder A string representing whether to sort results in ascending or descending order. Must be ASC or DESC. (optional)
         #
         # @return [Array<Role>] all roles for your organization
         #
