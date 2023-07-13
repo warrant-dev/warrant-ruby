@@ -307,7 +307,6 @@ module Warrant
         #
         # @param permission_id [String] The permission_id of the permission you want to check whether or not it exists on the user.
         # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the user has the given permission
@@ -325,7 +324,6 @@ module Warrant
                 permission_id: permission_id,
                 user_id: user_id,
                 context: opts[:context],
-                consistent_read: opts[:consistent_read],
                 debug: opts[:debug]
             )
         end
@@ -497,7 +495,6 @@ module Warrant
         #
         # @param feature_id [String] The feature_id of the feature to check whether the user has access to.
         # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @ return [Boolean] whether or not the user has the given feature
@@ -514,7 +511,6 @@ module Warrant
                     object_id: user_id
                 },
                 context: opts[:context],
-                consistent_read: opts[:consistent_read],
                 debug: opts[:debug]
             )
         end
