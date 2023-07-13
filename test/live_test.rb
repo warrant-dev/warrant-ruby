@@ -477,4 +477,22 @@ class LiveTest < Minitest::Test
         Warrant::Tenant.delete(new_tenant.tenant_id)
         Warrant::Permission.delete(new_permission.permission_id)
     end
+
+    def test_warrants_with_policy
+        new_user = Warrant::User.create
+        new_permission = Warrant::Permission.create(permission_id: "permission-1", name: "Permission 1", description: "some permission")
+
+        # Assign permission to user with context
+        Warrant::Warrant.create(new_permission, "member", new_user, "geo == 'us' && isActivated == true")
+
+        assert_equal true, Warrant::Warrant.check(new_permission, "member", new_user, context: { "geo": "us", "isActivated": true })
+        assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user, context: { "geo": "eu", "isActivated": false })
+
+        Warrant::Warrant.delete(new_permission, "member", new_user, "geo == 'us' && isActivated == true")
+
+        assert_equal false, Warrant::Warrant.check(new_permission, "member", new_user, { "geo": "us", "isActivated": true })
+
+        Warrant::User.delete(new_user.user_id)
+        Warrant::Permission.delete(new_permission.permission_id)
+    end
 end

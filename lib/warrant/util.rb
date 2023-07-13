@@ -21,6 +21,11 @@ module Warrant
                 case params
                 when Hash
                     params.each_with_object({}) do |(k, v), new_opts|
+                        if k.to_s == "context"
+                            new_opts[k] = v
+                            next
+                        end
+
                         new_key = Util.camelcase(k.to_s)
 
                         case v
