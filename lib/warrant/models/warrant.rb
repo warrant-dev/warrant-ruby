@@ -167,7 +167,6 @@ module Warrant
         #       * object_id (String) - The id of the specific object.
         #       * relation (String) - The relation for this object to subject association. The relation must be valid as per the object type definition. (optional)
         #   * context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
@@ -202,7 +201,6 @@ module Warrant
         # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         # @param subject [WarrantObject] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
         # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
@@ -239,7 +237,6 @@ module Warrant
                         subject: subject,
                         context: options[:context]
                     }],
-                    consistent_read: options[:consistent_read],
                     debug: options[:debug]
                 )
             end
@@ -252,7 +249,6 @@ module Warrant
                     subject: subject,
                     context: options[:context]
                 }],
-                consistent_read: options[:consistent_read],
                 debug: options[:debug]
             )
         end
@@ -265,7 +261,6 @@ module Warrant
         #   * relation (String) - The relation to check for this object to subject association. The relation must be valid as per the object type definition.
         #   * subject (WarrantObject) Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
         # @option options [Hash] :context Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @option options [Boolean] :consistent_read Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @option options [Boolean] :debug Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the given access check is authorized
@@ -314,7 +309,6 @@ module Warrant
                 return edge_authorize?(
                     op: op,
                     warrants: normalized_warrants,
-                    consistent_read: options[:consistent_read],
                     debug: options[:debug]
                 )
             end
@@ -322,7 +316,6 @@ module Warrant
             return authorize?(
                 op: op,
                 warrants: normalized_warrants,
-                consistent_read: options[:consistent_read],
                 debug: options[:debug]
             )
         end
@@ -332,7 +325,6 @@ module Warrant
         # @param user_id [String] Id of the user to check
         # @param permission_id [String] Id of the permission to check on the user
         # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @param consistentRead [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the user has the given permission
@@ -353,7 +345,6 @@ module Warrant
                     },
                     context: params[:context]
                 }],
-                consistentRead: params[:consistentRead],
                 debug: params[:debug]
             )
         end
@@ -365,7 +356,6 @@ module Warrant
         #   * object_id (String) - The id of the specific object.
         # @param feature_id [String] Id of the feature to check on the subject
         # @param context [Hash] - Object containing key-value pairs that specifies the context the warrant should be checked in. (optional)
-        # @param consistent_read [Boolean] Boolean flag indicating whether or not to enforce strict consistency for this access check. Defaults to false. (optional)
         # @param debug [Boolean] Boolean flag indicating whether or not to return debug information for this access check. Defaults to false. (optional)
         #
         # @return [Boolean] whether or not the user has the given permission
@@ -386,7 +376,6 @@ module Warrant
                     },
                     context: params[:context]
                 }],
-                consistent_read: params[:consistent_read],
                 debug: params[:debug]
             )
         end
