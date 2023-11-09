@@ -179,6 +179,76 @@ class LiveTest < Minitest::Test
         Warrant::Tenant.delete("tenant-3")
     end
 
+    def test_crud_objects
+        object1 = Warrant::Object.create(object_type: "document")
+        assert_equal "document", object1.object_type
+        assert object1.object_id
+        assert_nil object1.meta
+
+        object2 = Warrant::Object.create(object_type: "folder", object_id: "planning")
+        refetched_object = Warrant::Object.get(object2.object_type, object2.object_id, {warrant_token: "latest"})
+        assert_equal object2.object_type, refetched_object.object_type
+        assert_equal object2.object_id, refetched_object.object_id
+        assert_equal object2.meta, refetched_object.meta
+
+        object2 = Warrant::Object.update(object2.object_type, object2.object_id, { description: "Second document" })
+        refetched_object = Warrant::Object.get(object2.object_type, object2.object_id, {warrant_token: "latest"})
+        assert_equal object2.object_type, refetched_object.object_type
+        assert_equal object2.object_id, refetched_object.object_id
+        assert_equal object2.meta, refetched_object.meta
+
+        objects_list = Warrant::Object.list({ sort_by: "createdAt", limit: 10 }, { warrant_token: "latest" })
+        assert_equal 2, objects_list.results.length
+        assert_equal object1.object_type, objects_list.results[0].object_type
+        assert_equal object1.object_id, objects_list.results[0].object_id
+        assert_equal object2.object_type, objects_list.results[1].object_type
+        assert_equal object2.object_id, objects_list.results[1].object_id
+
+        objects_list = Warrant::Object.list({ sort_by: "createdAt", limit: 10, q: "planning" }, { warrant_token: "latest" })
+        assert_equal 1, objects_list.results.length
+        assert_equal object2.object_type, objects_list.results[0].object_type
+        assert_equal object2.object_id, objects_list.results[0].object_id
+
+        warrant_token = Warrant::Object.delete(object1.object_type, object1.object_id)
+        assert warrant_token
+        warrant_token = Warrant::Object.delete(object2.object_type, object2.object_id)
+        assert warrant_token
+        objects_list = Warrant::Object.list({ sort_by: "createdAt", limit: 10 }, { warrant_token: "latest" })
+        assert_equal 0, objects_list.results.length
+    end
+
+    def test_batch_create_delete_objects
+        objects = Warrant::Object.batch_create([
+            { object_type: "document", object_id: "document-a" },
+            { object_type: "document", object_id: "document-b" },
+            { object_type: "folder", object_id: "resources", meta: { description: "Helpful documents" }},
+        ])
+        assert_equal 3, objects.length
+
+        fetched_objects = Warrant::Object.list({ sort_by: "createdAt", limit: 10 }, { warrant_token: "latest" })
+        assert_equal 3, fetched_objects.results.length
+        assert_equal "document", fetched_objects.results[0].object_type
+        assert_equal "document-a", fetched_objects.results[0].object_id
+        assert_equal "document", fetched_objects.results[1].object_type
+        assert_equal "document-b", fetched_objects.results[1].object_id
+        assert_equal "folder", fetched_objects.results[2].object_type
+        assert_equal "resources", fetched_objects.results[2].object_id
+        assert_equal({"description" => "Helpful documents"}, fetched_objects.results[2].meta)
+
+        folder_resource = Warrant::Object.get("folder", "resources", { warrant_token: "latest" })
+        assert_equal "folder", folder_resource.object_type
+        assert_equal "resources", folder_resource.object_id
+
+        warrant_token = Warrant::Object.batch_delete([
+            { object_type: "document", object_id: "document-a" },
+            { object_type: "document", object_id: "document-b" },
+            { object_type: "folder", object_id: "resources", meta: { description: "Helpful documents" }},
+        ])
+        assert warrant_token
+        fetched_objects = Warrant::Object.list({ sort_by: "createdAt", limit: 10 }, { warrant_token: "latest" })
+        assert_equal 0, fetched_objects.results.length
+    end
+
     def test_multitenancy
         user1 = Warrant::User.create
         user2 = Warrant::User.create
