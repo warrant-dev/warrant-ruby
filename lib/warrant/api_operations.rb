@@ -35,8 +35,7 @@ module Warrant
                 headers["Warrant-Token"] = options[:warrant_token] if options.has_key?(:warrant_token)
 
                 unless params.empty?
-                    normalized_params = Util.normalize_params(params.compact)
-                    uri.query = URI.encode_www_form(normalized_params)
+                    uri.query = URI.encode_www_form(params)
                 end
 
                 http.get(uri, headers)
