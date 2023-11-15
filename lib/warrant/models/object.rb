@@ -34,8 +34,8 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                res_json = JSON.parse(res.body)
-                Object.new(res_json['objectType'], res_json['objectId'], res_json['meta'], res_json['createdAt'])
+                res_json = JSON.parse(res.body, symbolize_names: true)
+                Object.new(res_json[:objectType], res_json[:objectId], res_json[:meta], res_json[:createdAt])
             else
                 APIOperations.raise_error(res)
             end
@@ -43,10 +43,10 @@ module Warrant
 
         # Batch creates multiple objects with given parameters
         #
-        # @param [Array] Array of objects to create.
-        #   * object_type The type of the object (e.g. user, tenant, role, permission, etc).
-        #   * object_id Customer defined string identifier for this object. Can only contain alphanumeric chars and/or '-', '_', '|', '@'. If not provided, Warrant will create a univerally unique identifier (UUID) for the object and return it. If allowing Warrant to generate an id, store the id in your application so you can provide it for authorization requests on that object. (optional)
-        #   * meta A JSON object containing additional information about this object (e.g. role name/description, user email/name, etc.) to be persisted to Warrant. (optional)
+        # @param [Array<Hash>] objects Array of objects to create.
+        # @option objects [String] :object_type The type of the object (e.g. user, tenant, role, permission, etc).
+        # @option objects [String] :object_id Customer defined string identifier for this object. Can only contain alphanumeric chars and/or '-', '_', '|', '@'. If not provided, Warrant will create a univerally unique identifier (UUID) for the object and return it. If allowing Warrant to generate an id, store the id in your application so you can provide it for authorization requests on that object. (optional)
+        # @option objects [Hash] :meta A JSON object containing additional information about this object (e.g. role name/description, user email/name, etc.) to be persisted to Warrant. (optional)
         #
         # @return [Array<Object>] all created objects
         #
@@ -64,8 +64,8 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                objects = JSON.parse(res.body)
-                objects.map{ |object| Object.new(object['objectType'], object['objectId'], object['meta'], object['createdAt']) }
+                objects = JSON.parse(res.body, symbolize_names: true)
+                objects.map{ |object| Object.new(object[:objectType], object[:objectId], object[:meta], object[:createdAt]) }
             else
                 APIOperations.raise_error(res)
             end
@@ -98,11 +98,11 @@ module Warrant
 
         # Batch deletes multiple objects with given parameters
         #
-        # @param [Array] Array of objects to delete.
-        #   * object_type The type of the object (e.g. user, tenant, role, permission, etc).
-        #   * object_id Customer defined string identifier for this object.
+        # @param [Array<Hash>] objects Array of objects to delete.
+        # @option objects [String] :object_type The type of the object (e.g. user, tenant, role, permission, etc).
+        # @option objects [String] :object_id Customer defined string identifier for this object.
         #
-        # @return [Array<Object>] all deleted objects
+        # @return [nil] if delete was successful
         #
         # @example Delete two objects with object type "user" and object ids "test-user-1" and "test-user-2"
         #   Warrant::Object.batch_delete([{ object_type: "user", object_id: "test-user-1" }, { object_type: "user", object_id: "test-user-2" }])
@@ -124,12 +124,15 @@ module Warrant
 
         # Lists all objects for your organization and environment
         #
-        # @option filters [String] :objectType Only return objects with an `objectType` matching this value
+        # @param [Hash] filters Filters to apply to result set
+        # @param [Hash] options Options to apply on a per-request basis
+        # @option filters [String] :object_type Only return objects with an +object_type+ matching this value
         # @option filters [Integer] :limit A positive integer representing the maximum number of items to return in the response. Must be less than or equal to 1000. Defaults to 25. (optional)
-        # @option filters [String] :prevCursor A cursor representing your place in a list of results. Requests containing prevCursor will return the results immediately preceding the cursor. (optional)
-        # @option filters [String] :nextCursor A cursor representing your place in a list of results. Requests containing nextCursor will return the results immediately following the cursor. (optional)
-        # @option filters [String] :sortBy The column to sort the result by. Unless otherwise specified, all list endpoints are sorted by their unique identifier by default. Supported values for objects are `objectType`, `objectId`, and `createdAt` (optional)
-        # @option filters [String] :sortOrder The order in which to sort the result by. Valid values are ASC and DESC. Defaults to ASC. (optional)
+        # @option filters [String] :prev_cursor A cursor representing your place in a list of results. Requests containing prev_cursor will return the results immediately preceding the cursor. (optional)
+        # @option filters [String] :next_cursor A cursor representing your place in a list of results. Requests containing next_cursor will return the results immediately following the cursor. (optional)
+        # @option filters [String] :sort_by The column to sort the result by. Unless otherwise specified, all list endpoints are sorted by their unique identifier by default. Supported values for objects are +object_type+, +object_id+, and +created_at+ (optional)
+        # @option filters [String] :sort_order The order in which to sort the result by. Valid values are +ASC+ and +DESC+. Defaults to +ASC+. (optional)
+        # @option options [String] :warrant_token A valid warrant token from a previous write operation or latest. Used to specify desired consistency for this read operation. (optional)
         #
         # @return [Array<Object>] all objects for your organization and environment
         #
@@ -144,9 +147,9 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                list_result = JSON.parse(res.body)
-                objects = list_result['results'].map{ |object| Object.new(object['objectType'], object['objectId'], object['meta'], object['createdAt']) }
-                return ListResponse.new(objects, list_result['prevCursor'], list_result['nextCursor'])
+                list_result = JSON.parse(res.body, symbolize_names: true)
+                objects = list_result[:results].map{ |object| Object.new(object[:objectType], object[:objectId], object[:meta], object[:createdAt]) }
+                return ListResponse.new(objects, list_result[:prevCursor], list_result[:nextCursor])
             else
                 APIOperations.raise_error(res)
             end
@@ -167,8 +170,8 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                object = JSON.parse(res.body)
-                Object.new(object['objectType'], object['objectId'], object['meta'], object['createdAt'])
+                object = JSON.parse(res.body, symbolize_names: true)
+                Object.new(object[:objectType], object[:objectId], object[:meta], object[:createdAt])
             else
                 APIOperations.raise_error(res)
             end
@@ -198,8 +201,8 @@ module Warrant
 
             case res
             when Net::HTTPSuccess
-                res_json = JSON.parse(res.body)
-                Object.new(res_json['objectType'], res_json['objectId'], res_json['meta'], res_json['createdAt'])
+                res_json = JSON.parse(res.body, symbolize_names: true)
+                Object.new(res_json[:objectType], res_json[:objectId], res_json[:meta], res_json[:createdAt])
             else
                 APIOperations.raise_error(res)
             end
