@@ -397,7 +397,7 @@ class LiveTest < Minitest::Test
 
         Warrant::Permission.assign_to_user(viewer_user.user_id, view_permission.permission_id)
 
-        assert_equal true, Warrant::Warrant.user_has_permission?({ user_id: viewer_user.user_id, permission_id: view_permission.permission_id, relation: "member" })
+        assert_equal true, Warrant::Warrant.user_has_permission?({ user_id: viewer_user.user_id, permission_id: view_permission.permission_id, relation: "member" }, { warrant_token: "latest" })
 
         viewer_user_permissions = Warrant::Permission.list_for_user(viewer_user.user_id, { limit: 100 }, { warrant_token: "latest" })
         assert_equal 1, viewer_user_permissions.results.length
