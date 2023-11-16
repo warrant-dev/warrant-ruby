@@ -16,9 +16,9 @@ module Warrant
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
         #
-        # @param object [WarrantObject | Hash] Object to create in the warrant. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param object [WarrantObject | Hash] The object to which the warrant will apply. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject | Hash] Subject to create in the warrant. Subject can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param subject [WarrantObject | Hash] The subject for which the warrant will apply. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param policy [String] - A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [Warrant] created warrant
@@ -56,9 +56,9 @@ module Warrant
         # Batch creates multiple warrants with given parameters
         #
         # @param [Array<Hash>] warrants Array of warrants to create.
-        # @option warrants [WarrantObject | Hash] :object Object to create in the warrant. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [WarrantObject | Hash] :object The object to which the warrant will apply. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @option warrants [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option warrants [WarrantObject | Hash] :subject Subject to create in the warrant. Subject can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [WarrantObject | Hash] :subject The subject for which the warrant will apply. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @option warrants [String] :policy A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [Array<Warrant>] all created warrants
@@ -98,9 +98,9 @@ module Warrant
 
         # Deletes a warrant specified by the combination of object_type, object_id, relation, and subject.
         #
-        # @param object [WarrantObject | Hash] Object to delete in the warrant. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param object [WarrantObject | Hash] The object to which the warrant applies. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject | Hash] Subject to delete in the warrant. Subject can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param subject [WarrantObject | Hash] The subject to for which the warrant applies. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @param policy [String] - A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [nil] if delete was successful
@@ -134,9 +134,9 @@ module Warrant
         # Batch deletes multiple warrants with given parameters
         #
         # @param [Array<Hash>] warrants Array of warrants to delete.
-        # @option warrants [WarrantObject | Hash] :object Object to delete in the warrant. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [WarrantObject | Hash] :object The object to which the warrant applies. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @option warrants [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
-        # @option warrants [WarrantObject | Hash] :subject Subject to delete in the warrant. Subject can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [WarrantObject | Hash] :subject The subject for which the warrant applies. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
         # @option warrants [String] :policy A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [nil] if delete was successful
