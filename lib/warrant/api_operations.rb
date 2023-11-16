@@ -4,49 +4,51 @@ module Warrant
     # @!visibility private
     class APIOperations
         class << self
-            def post(uri, params = {})
+            def post(uri, params: {}, options: {})
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
                 headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
+                headers["Warrant-Token"] = options[:warrant_token] if options.has_key?(:warrant_token)
                 http.post(uri.path, params.to_json, headers)
             end
 
-            def delete(uri, params = {})
+            def delete(uri, params: {}, options: {})
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 request = Net::HTTP::Delete.new(uri.path)
                 request["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
                 request["User-Agent"] = "warrant-ruby/#{VERSION}"
-
+                headers["Warrant-Token"] = options[:warrant_token] if options.has_key?(:warrant_token)
                 http.request(request, params.to_json)
             end
 
-            def get(uri, params = {})
+            def get(uri, params: {}, options: {})
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
                 headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
+                headers["Warrant-Token"] = options[:warrant_token] if options.has_key?(:warrant_token)
 
                 unless params.empty?
-                    normalized_params = Util.normalize_params(params.compact)
-                    uri.query = URI.encode_www_form(normalized_params)
+                    uri.query = URI.encode_www_form(params)
                 end
 
                 http.get(uri, headers)
             end
 
-            def put(uri, params = {})
+            def put(uri, params: {}, options: {})
                 http = Net::HTTP.new(uri.host, uri.port)
                 http.use_ssl = ::Warrant.config.use_ssl
                 headers = {
                     "User-Agent": "warrant-ruby/#{VERSION}"
                 }
                 headers["Authorization"] = "ApiKey #{::Warrant.config.api_key}" unless ::Warrant.config.api_key.empty?
+                headers["Warrant-Token"] = options[:warrant_token] if options.has_key?(:warrant_token)
                 http.put(uri.path, params.to_json, headers)
             end
 

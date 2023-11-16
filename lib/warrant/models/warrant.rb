@@ -2,24 +2,24 @@
 
 module Warrant
     class Warrant
-        attr_reader :id, :object_type, :object_id, :relation, :subject, :policy, :is_implicit
+        attr_reader :id, :object_type, :object_id, :relation, :subject, :policy, :warrant_token
 
         # @!visibility private
-        def initialize(object_type, object_id, relation, subject, policy = nil, is_implicit = nil)
+        def initialize(object_type, object_id, relation, subject, policy = nil, warrant_token = nil)
             @object_type = object_type
             @object_id = object_id
             @relation = relation
             @subject = subject
             @policy = policy
-            @is_implicit = is_implicit
+            @warrant_token = warrant_token
         end
 
         # Create a new warrant that associates an object (object_type and object_id) to a subject via a relation.
         #
-        # @param object [WarrantObject | Hash] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
-        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject | Hash] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
-        # @param policy [String] - A boolean expression that must evaluate to `true` for this warrant to apply. The expression can reference variables that are provided in the `context` attribute of access check requests. (optional)
+        # @param object [WarrantObject | Hash] The object to which the warrant will apply. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject | Hash] The subject for which the warrant will apply. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param policy [String] - A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [Warrant] created warrant
         #
@@ -30,7 +30,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.create(object, relation, subject, policy = nil)
+        def self.create(object, relation, subject, policy = nil, options = {})
             params = {
                 object_type: object.respond_to?(:warrant_object_type) ? object.warrant_object_type.to_s : object[:object_type],
                 object_id: object.respond_to?(:warrant_object_id) ? object.warrant_object_id.to_s : object[:object_id],
@@ -41,13 +41,56 @@ module Warrant
                 },
                 policy: policy
             }
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
-            res_json = JSON.parse(res.body)
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v2/warrants"), params: Util.normalize_params(params), options: options)
 
             case res
             when Net::HTTPSuccess
-                subject = Subject.new(res_json['subject']['objectType'], res_json['subject']['objectId'], res_json['subject']['relation'])
-                Warrant.new(res_json['objectType'], res_json['objectId'], res_json['relation'], subject, res_json['policy'])
+                res_json = JSON.parse(res.body, symbolize_names: true)
+                subject = Subject.new(res_json[:subject][:objectType], res_json[:subject][:objectId], res_json[:subject][:relation])
+                Warrant.new(res_json[:objectType], res_json[:objectId], res_json[:relation], subject, res_json[:policy], res['Warrant-Token'])
+            else
+                APIOperations.raise_error(res)
+            end
+        end
+
+        # Batch creates multiple warrants with given parameters
+        #
+        # @param [Array<Hash>] warrants Array of warrants to create.
+        # @option warrants [WarrantObject | Hash] :object The object to which the warrant will apply. Object can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
+        # @option warrants [WarrantObject | Hash] :subject The subject for which the warrant will apply. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [String] :policy A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
+        #
+        # @return [Array<Warrant>] all created warrants
+        #
+        # @raise [Warrant::DuplicateRecordError]
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.batch_create(warrants, options = {})
+            mapped_warrants = warrants.map{ |warrant|
+                {
+                    object_type: warrant[:object].respond_to?(:warrant_object_type) ? warrant[:object].warrant_object_type.to_s : warrant[:object_type],
+                    object_id: warrant[:object].respond_to?(:warrant_object_id) ? warrant[:object].warrant_object_id.to_s : warrant[:object_id],
+                    relation: warrant[:relation],
+                    subject: {
+                        object_type: warrant[:subject].respond_to?(:warrant_object_type) ? warrant[:subject].warrant_object_type.to_s : warrant[:subject][:object_type],
+                        object_id: warrant[:subject].respond_to?(:warrant_object_id) ? warrant[:subject].warrant_object_id.to_s : warrant[:subject][:object_id]
+                    },
+                    policy: warrant[:policy]
+                }
+            }
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v2/warrants"), params: Util.normalize_params(mapped_warrants), options: options)
+
+            case res
+            when Net::HTTPSuccess
+                res_json = JSON.parse(res.body, symbolize_names: true)
+                res_json.map{ |warrant|
+                    subject = Subject.new(warrant[:subject][:objectType], warrant[:subject][:objectId], warrant[:subject][:relation])
+                    Warrant.new(warrant[:objectType], warrant[:objectId], warrant[:relation], subject, warrant[:policy], res['Warrant-Token'])
+                }
             else
                 APIOperations.raise_error(res)
             end
@@ -55,10 +98,10 @@ module Warrant
 
         # Deletes a warrant specified by the combination of object_type, object_id, relation, and subject.
         #
-        # @param object [WarrantObject | Hash] Object to check in the access check. Object must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
-        # @param relation [String] The relation to check for this object to subject association. The relation must be valid as per the object type definition.
-        # @param subject [WarrantObject | Hash] Subject to check in the access check. Subject must include WarrantObject module and implements its methods (`warrant_object_type` and `warrant_object_id`).
-        # @param policy [String] - A boolean expression that must evaluate to `true` for this warrant to apply. The expression can reference variables that are provided in the `context` attribute of access check requests. (optional)
+        # @param object [WarrantObject | Hash] The object to which the warrant applies. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param relation [String] The relation for this object to subject association. The relation must be valid as per the object type definition.
+        # @param subject [WarrantObject | Hash] The subject to for which the warrant applies. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @param policy [String] - A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
         #
         # @return [nil] if delete was successful
         #
@@ -67,7 +110,7 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.delete(object, relation, subject, policy = nil)
+        def self.delete(object, relation, subject, policy = nil, options = {})
             params = {
                 object_type: object.respond_to?(:warrant_object_type) ? object.warrant_object_type.to_s : object[:object_type],
                 object_id: object.respond_to?(:warrant_object_id) ? object.warrant_object_id.to_s : object[:object_id],
@@ -78,11 +121,87 @@ module Warrant
                 },
                 policy: policy
             }
-            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v1/warrants"), Util.normalize_params(params))
+            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v2/warrants"), params: Util.normalize_params(params), options: options)
 
             case res
             when Net::HTTPSuccess
-                return
+                return res['Warrant-Token']
+            else
+                APIOperations.raise_error(res)
+            end
+        end
+
+        # Batch deletes multiple warrants with given parameters
+        #
+        # @param [Array<Hash>] warrants Array of warrants to delete.
+        # @option warrants [WarrantObject | Hash] :object The object to which the warrant applies. Can be a hash with object type and id or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [String] :relation The relation for this object to subject association. The relation must be valid as per the object type definition.
+        # @option warrants [WarrantObject | Hash] :subject The subject for which the warrant applies. Can be a hash with object type and id and an optional relation or an instance of a class that implements the WarrantObject module and its methods (`warrant_object_type` and `warrant_object_id`). The object type must be one of your system's existing object type.
+        # @option warrants [String] :policy A boolean expression that must evaluate to true for this warrant to apply. The expression can reference variables that are provided in the context attribute of access check requests. (optional)
+        #
+        # @return [nil] if delete was successful
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidRequestError]
+        # @raise [Warrant::NotFoundError]
+        # @raise [Warrant::UnauthorizedError]
+        # @raise [Warrant::WarrantError]
+        def self.batch_delete(warrants, options = {})
+            mapped_warrants = warrants.map{ |warrant|
+                {
+                    object_type: warrant[:object].respond_to?(:warrant_object_type) ? warrant[:object].warrant_object_type.to_s : warrant[:object_type],
+                    object_id: warrant[:object].respond_to?(:warrant_object_id) ? warrant[:object].warrant_object_id.to_s : warrant[:object_id],
+                    relation: warrant[:relation],
+                    subject: {
+                        object_type: warrant[:subject].respond_to?(:warrant_object_type) ? warrant[:subject].warrant_object_type.to_s : warrant[:subject][:object_type],
+                        object_id: warrant[:subject].respond_to?(:warrant_object_id) ? warrant[:subject].warrant_object_id.to_s : warrant[:subject][:object_id]
+                    },
+                    policy: warrant[:policy]
+                }
+            }
+            res = APIOperations.delete(URI.parse("#{::Warrant.config.api_base}/v2/warrants"), params: Util.normalize_params(mapped_warrants), options: options)
+
+            case res
+            when Net::HTTPSuccess
+                return res['Warrant-Token']
+            else
+                APIOperations.raise_error(res)
+            end
+        end
+
+        # List all warrants for your organization and environment
+        #
+        # @param [Hash] filters Filters to apply to result set
+        # @param [Hash] options Options to apply on a per-request basis
+        # @option filters [String] :object_type _Required if object_id is provided._ Only return warrants whose object_type matches this value. (optional)
+        # @option filters [String] :object_id Only return warrants whose object_id matches this value. (optional)
+        # @option filters [String] :relation Only return warrants whose relation matches this value. (optional)
+        # @option filters [String] :subject_type Required if :subjectId is provided. Only return warrants with a subject whose objectType matches this value. (optional)
+        # @option filters [String] :subject_id Only return warrants with a subject whose object_id matches this value. (optional)
+        # @option filters [String] :subject_relation Only return warrants with a subject whose relation matches this value. (optional)
+        # @option filters [Integer] :limit A positive integer representing the maximum number of items to return in the response. Must be less than or equal to 1000. Defaults to 25. (optional)
+        # @option filters [String] :prev_cursor A cursor representing your place in a list of results. Requests containing prev_cursor will return the results immediately preceding the cursor. (optional)
+        # @option filters [String] :next_cursor A cursor representing your place in a list of results. Requests containing next_cursor will return the results immediately following the cursor. (optional)
+        # @option filters [String] :sort_by The column to sort the result by. Unless otherwise specified, all list endpoints are sorted by their unique identifier by default. Supported values for objects are +object_type+, +object_id+, and +created_at+ (optional)
+        # @option filters [String] :sort_order The order in which to sort the result by. Valid values are +ASC+ and +DESC+. Defaults to +ASC+. (optional)
+        # @option options [String] :warrant_token A valid warrant token from a previous write operation or latest. Used to specify desired consistency for this read operation. (optional)
+        #
+        # @return [Array<Warrant>] all permissions for your organization
+        #
+        # @raise [Warrant::InternalError]
+        # @raise [Warrant::InvalidParameterError]
+        # @raise [Warrant::UnauthorizedError]
+        def self.list(filters = {}, options = {})
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v2/warrants"), params: Util.normalize_params(filters), options: options)
+
+            case res
+            when Net::HTTPSuccess
+                list_result = JSON.parse(res.body, symbolize_names: true)
+                warrants = list_result[:results].map{ |warrant|
+                    subject = Subject.new(warrant[:subject][:objectType], warrant[:subject][:objectId], warrant[:subject][:relation])
+                    Warrant.new(warrant[:objectType], warrant[:objectId], warrant[:relation], subject, warrant[:policy])
+                }
+                return ListResponse.new(warrants, list_result[:prevCursor], list_result[:nextCursor])
             else
                 APIOperations.raise_error(res)
             end
@@ -90,7 +209,7 @@ module Warrant
 
         # Query to find all warrants for a given object or subject.
         #
-        # @param warrant_query [WarrantQuery] Query to run for a set of warrants.
+        # @param warrant_query [String] Query to run for a set of warrants.
         # @option filters [Integer] :page A positive integer (starting with 1) representing the page of items to return in response. Used in conjunction with the limit param. (optional)
         # @option filters [Integer] :limit A positive integer representing the max number of items to return in response. (optional)
         #
@@ -101,54 +220,19 @@ module Warrant
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::UnauthorizedError]
         # @raise [Warrant::WarrantError]
-        def self.query(warrant_query = WarrantQuery.new, filters = {})
-            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v1/query"), { "q": warrant_query.to_query_param, **filters })
+        def self.query(query, filters: {}, options: {})
+            params = filters.merge(q: query)
+            res = APIOperations.get(URI.parse("#{::Warrant.config.api_base}/v2/query"), params: Util.normalize_params(params), options: options)
 
             case res
             when Net::HTTPSuccess
-                query_result = JSON.parse(res.body)
-                query_result['result'] = query_result['result'].map{ |warrant|
-                    subject = Subject.new(warrant['subject']['objectType'], warrant['subject']['objectId'], warrant['subject']['relation'])
-                    Warrant.new(warrant['objectType'], warrant['objectId'], warrant['relation'], subject, warrant['context'], warrant['isImplicit'])
+                query_response = JSON.parse(res.body, symbolize_names: true)
+                query_results = query_response[:results].map{ |result|
+                    subject = Subject.new(result[:warrant][:subject][:objectType], result[:warrant][:subject][:objectId], result[:warrant][:subject][:relation])
+                    warrant = Warrant.new(result[:warrant][:objectType], result[:warrant][:objectId], result[:warrant][:relation], subject, result[:warrant][:policy])
+                    QueryResult.new(result[:objectType], result[:objectId], warrant, result[:isImplicit], result[:meta])
                 }
-
-                if query_result['meta']['feature']
-                    query_result['meta']['feature'].each{ |featureId, feature|
-                        query_result['meta']['feature'][featureId] = Feature.new(feature['featureId'])
-                    }
-                end
-
-                if query_result['meta']['pricing-tier']
-                    query_result['meta']['pricing-tier'].each{ |pricingTierId, pricingTier|
-                        query_result['meta']['pricing-tier'][pricingTierId] = PricingTier.new(pricingTier['pricingTierId'])
-                    }
-                end
-
-                if query_result['meta']['permission']
-                    query_result['meta']['permission'].each{ |permissionId, permission|
-                        query_result['meta']['permission'][permissionId] = Permission.new(permission['permissionId'], permission['name'], permission['description'])
-                    }
-                end
-
-                if query_result['meta']['role']
-                    query_result['meta']['role'].each{ |roleId, role|
-                        query_result['meta']['role'][roleId] = Role.new(role['roleId'], role['name'], role['description'])
-                    }
-                end
-
-                if query_result['meta']['user']
-                    query_result['meta']['user'].each{ |userId, user|
-                        query_result['meta']['user'][userId] = User.new(user['userId'], user['email'], user['createdAt'])
-                    }
-                end
-
-                if query_result['meta']['tenant']
-                    query_result['meta']['tenant'].each{ |tenantId, tenant|
-                        query_result['meta']['tenant'][tenantId] = Tenant.new(tenant['tenantId'], tenant['name'], tenant['createdAt'])
-                    }
-                end
-
-                query_result
+                return ListResponse.new(query_results, query_response[:prevCursor], query_response[:nextCursor])
             else
                 APIOperations.raise_error(res)
             end
@@ -187,12 +271,12 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.is_authorized?(params = {})
+        def self.is_authorized?(params = {}, options = {})
             unless ::Warrant.config.authorize_endpoint.nil?
-                return edge_authorize?(params)
+                return edge_authorize?(params, options)
             end
 
-            return authorize?(params)
+            return authorize?(params, options)
         end
 
         # Checks whether a specified access check is authorized or not.
@@ -215,13 +299,21 @@ module Warrant
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
         def self.check(object, relation, subject, options = {})
-            if subject.instance_of?(Subject)
+            if object.is_a?(WarrantObject)
+                object_type = object.warrant_object_type.to_s
+                object_id = object.warrant_object_id.to_s
+            else
+                object_type = object[:object_type]
+                object_id = object[:object_id]
+            end
+
+            if subject.is_a?(Subject)
                 subject = {
                     object_type: subject.object_type,
                     object_id: subject.object_id,
                     relation: subject.relation
                 }.compact!
-            else
+            elsif subject.is_a?(WarrantObject)
                 subject = {
                     object_type: subject.warrant_object_type.to_s,
                     object_id: subject.warrant_object_id.to_s
@@ -231,8 +323,8 @@ module Warrant
             unless ::Warrant.config.authorize_endpoint.nil?
                 return edge_authorize?(
                     warrants: [{
-                        object_type: object.warrant_object_type.to_s,
-                        object_id: object.warrant_object_id.to_s,
+                        object_type: object_type,
+                        object_id: object_id,
                         relation: relation,
                         subject: subject,
                         context: options[:context]
@@ -243,8 +335,8 @@ module Warrant
 
             return authorize?(
                 warrants: [{
-                    object_type: object.warrant_object_type.to_s,
-                    object_id: object.warrant_object_id.to_s,
+                    object_type: object_type,
+                    object_id: object_id,
                     relation: relation,
                     subject: subject,
                     context: options[:context]
@@ -283,22 +375,32 @@ module Warrant
         # @raise [Warrant::UnauthorizedError]
         def self.check_many(op, warrants, options = {})
             normalized_warrants = warrants.map do |warrant|
-                if warrant[:subject].instance_of?(Subject)
+                if warrant[:object].is_a?(WarrantObject)
+                    object_type = warrant[:object].warrant_object_type.to_s
+                    object_id = warrant[:object].warrant_object_id.to_s
+                else
+                    object_type = warrant[:object][:object_type]
+                    object_id = warrant[:object][:object_id]
+                end
+
+                if warrant[:subject].is_a?(Subject)
                     subject = {
                         object_type: warrant[:subject].object_type,
                         object_id: warrant[:subject].object_id,
                         relation: warrant[:subject].relation
                     }.compact!
-                else
+                elsif warrant[:subject].is_a?(WarrantObject)
                     subject = {
                         object_type: warrant[:subject].warrant_object_type.to_s,
                         object_id: warrant[:subject].warrant_object_id.to_s
                     }
+                else
+                    subject = warrant[:subject]
                 end
 
                 {
-                    object_type: warrant[:object].warrant_object_type.to_s,
-                    object_id: warrant[:object].warrant_object_id.to_s,
+                    object_type: object_type,
+                    object_id: object_id,
                     relation: warrant[:relation],
                     subject: subject,
                     context: warrant[:context]
@@ -306,18 +408,18 @@ module Warrant
             end
 
             unless ::Warrant.config.authorize_endpoint.nil?
-                return edge_authorize?(
+                return edge_authorize?({
                     op: op,
                     warrants: normalized_warrants,
                     debug: options[:debug]
-                )
+                }, options)
             end
 
-            return authorize?(
+            return authorize?({
                 op: op,
                 warrants: normalized_warrants,
                 debug: options[:debug]
-            )
+            }, options)
         end
 
         # Checks whether a given user has a given permission.
@@ -333,12 +435,12 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.user_has_permission?(params = {})
-            return is_authorized?(
+        def self.user_has_permission?(params = {}, options = {})
+            return is_authorized?({
                 warrants: [{
                     object_type: Permission::OBJECT_TYPE,
                     object_id: params[:permission_id],
-                    relation: "member",
+                    relation: params[:relation],
                     subject: {
                         object_type: User::OBJECT_TYPE,
                         object_id: params[:user_id]
@@ -346,7 +448,7 @@ module Warrant
                     context: params[:context]
                 }],
                 debug: params[:debug]
-            )
+            }, options)
         end
 
         # Checks whether a given subject has a given feature.
@@ -364,12 +466,12 @@ module Warrant
         # @raise [Warrant::InvalidParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.has_feature?(params = {})
-            return is_authorized?(
+        def self.has_feature?(params = {}, options = {})
+            return is_authorized?({
                 warrants: [{
                     object_type: Feature::OBJECT_TYPE,
                     object_id: params[:feature_id],
-                    relation: "member",
+                    relation: params[:relation],
                     subject: {
                         object_type: params[:subject][:object_type],
                         object_id: params[:subject][:object_id]
@@ -377,13 +479,13 @@ module Warrant
                     context: params[:context]
                 }],
                 debug: params[:debug]
-            )
+            }, options)
         end
 
         private
 
-        def self.authorize?(params = {})
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v2/authorize"), Util.normalize_params(params))
+        def self.authorize?(params = {}, options = {})
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v2/check"), params: Util.normalize_params(params), options: options)
             res_json = JSON.parse(res.body)
 
             case res
@@ -400,9 +502,9 @@ module Warrant
             end
         end
 
-        def self.edge_authorize?(params = {})
-            request_url = URI.parse("#{::Warrant.config.authorize_endpoint}/v2/authorize")
-            res = APIOperations.post(request_url, Util.normalize_params(params))
+        def self.edge_authorize?(params = {}, options = {})
+            request_url = URI.parse("#{::Warrant.config.authorize_endpoint}/v2/check")
+            res = APIOperations.post(request_url, params: Util.normalize_params(params), options: options)
             res_json = JSON.parse(res.body)
 
             case res

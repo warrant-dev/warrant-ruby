@@ -15,9 +15,9 @@ module Warrant
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.create_authorization_session(params = {})
+        def self.create_authorization_session(params = {}, options = {})
             params = params.merge(type: "sess")
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), Util.normalize_params(params))
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), params: Util.normalize_params(params), options: options)
 
             case res
             when Net::HTTPSuccess
@@ -45,9 +45,9 @@ module Warrant
         # @raise [Warrant::MissingRequiredParameterError]
         # @raise [Warrant::NotFoundError]
         # @raise [Warrant::UnauthorizedError]
-        def self.create_self_service_session(redirect_url, params = {})
+        def self.create_self_service_session(redirect_url, params = {}, options = {})
             params = params.merge(type: "ssdash")
-            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), Util.normalize_params(params))
+            res = APIOperations.post(URI.parse("#{::Warrant.config.api_base}/v1/sessions"), params: Util.normalize_params(params), options: options)
 
             case res
             when Net::HTTPSuccess
